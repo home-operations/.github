@@ -44,3 +44,4 @@ jobs:
           GITHUB_CLIENT_ID: ${{ secrets.CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           ADMIN_REPO: .github
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
