@@ -1,0 +1,50 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Safe Settings Sync
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      # renovate: datasource=github-releases depName=github/safe-settings
+      SAFE_SETTINGS_VERSION: 2.1.16
+      SAFE_SETTINGS_CODE_DIR: ${{ github.workspace }}/.safe-settings-code
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Checkout Safe Settings
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: github/safe-settings
+          ref: 2.1.16
+          path: $SAFE_SETTINGS_CODE_DIR
+
+      - name: Generate Token
+        uses: actions/create-github-app-token@21cfef2b496dd8ef5b904c159339626a10ad380e # v1.11.6
+        id: app-token
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Setup Node
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+
+      - name: Install Dependencies
+        run: npm install
+        working-directory: $SAFE_SETTINGS_CODE_DIR
+
+      - name: Run Sync
+        run: npm run full-sync
+        working-directory: $SAFE_SETTINGS_CODE_DIR
+        env:
+          GH_ORG: ${{ github.repository_owner }}
+          APP_ID: ${{ secrets.BOT_APP_ID }}
+          PRIVATE_KEY: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          ADMIN_REPO: .github
