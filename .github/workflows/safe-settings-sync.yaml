@@ -41,4 +41,6 @@ jobs:
           GH_ORG: ${{ github.repository_owner }}
           APP_ID: ${{ secrets.BOT_APP_ID }}
           PRIVATE_KEY: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          GITHUB_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           ADMIN_REPO: .github
