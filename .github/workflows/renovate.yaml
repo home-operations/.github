@@ -26,8 +26,11 @@ on:
           - reset
       logLevel:
         description: Log Level
+        type: choice
         default: debug
-        required: false
+        options:
+          - debug
+          - info
 
 jobs:
   renovate:
