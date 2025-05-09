@@ -24,20 +24,18 @@ on:
           - debug
           - info
 
+permissions:
+  contents: read
+
 jobs:
   renovate:
     name: Renovate
     runs-on: ubuntu-latest
+    permissions:
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Debug Repology Timeouts
-        run: |
-          curl wtfismyip.com/text
-          curl icanhazip.com
-          curl ipinfo.io/ip
-          curl whatismyip.akamai.com
 
       - name: Generate Token
         uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
