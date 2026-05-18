@@ -1,0 +1,35 @@
+name: Bug report
+description: Report a bug
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please read the [AI Usage Policy](https://github.com/home-operations/.github/blob/main/CONTRIBUTING.md#ai-usage-policy) before submitting.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, what you expected, and what actually happened.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or output
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "v1.2.3"
