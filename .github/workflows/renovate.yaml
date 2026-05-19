@@ -57,7 +57,6 @@ jobs:
           RENOVATE_INTERNAL_CHECKS_FILTER: strict
           RENOVATE_PLATFORM: github
           RENOVATE_PLATFORM_COMMIT: true
-          MISE_TRUSTED_CONFIG_PATHS: /tmp/renovate/repos
+          RENOVATE_CUSTOM_ENV_VARIABLES: '{"MISE_TRUSTED_CONFIG_PATHS":"/tmp/renovate/repos"}'
         with:
           token: ${{ steps.app-token.outputs.token }}
-          env-regex: "^(?:RENOVATE_\\w+|LOG_LEVEL|GITHUB_COM_TOKEN|NODE_OPTIONS|AWS_TOKEN|MISE_\\w+)$"
