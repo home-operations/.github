@@ -1,0 +1,34 @@
+[pre-commit]
+parallel = true
+
+[pre-commit.commands.format-go]
+glob = ["*.go"]
+run = "gofmt -s -w {staged_files}"
+stage_fixed = true
+
+[pre-commit.commands.format-just]
+glob = ["*.just", ".justfile"]
+run = "for f in {staged_files}; do just --justfile $f --fmt; done"
+stage_fixed = true
+
+[pre-commit.commands.format-mise]
+glob = [".mise.toml"]
+run = "mise fmt"
+stage_fixed = true
+
+[pre-commit.commands.format-yaml]
+glob = ["*.yml", "*.yaml"]
+run = "yamlfmt {staged_files}"
+stage_fixed = true
+
+[pre-commit.commands.mise-lock]
+glob = [".mise.toml"]
+run = "mise lock && git add mise.lock"
+
+[pre-commit.commands.shellcheck]
+glob = ["*.sh"]
+run = "shellcheck {staged_files}"
+
+[pre-commit.commands.zizmor]
+glob = [".github/workflows/*.yaml", ".github/actions/**/action.yaml"]
+run = "zizmor --offline {staged_files}"
