@@ -1,8 +1,8 @@
 [tools]
-"aqua:evilmartians/lefthook" = "2.1.8"
-"aqua:google/yamlfmt" = "0.21.0"
-"aqua:koalaman/shellcheck" = "0.11.0"
-"aqua:zizmorcore/zizmor" = "1.25.2"
+lefthook = "2.1.8"
+shellcheck = "0.11.0"
+yamlfmt = "0.21.0"
+zizmor = "1.25.2"
 
 [hooks]
 postinstall = "lefthook install"
