@@ -49,6 +49,36 @@ jobs:
         working-directory: ${{ env.SAFE_SETTINGS_DIR }}
         run: npm ci
 
+      - name: Generate Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.BOT_CLIENT_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }} # zizmor: ignore[github-app] org-wide listing
+          permission-metadata: read
+
+      # safe-settings PATCHes every installation repo it sees, including
+      # archived ones (which the API rejects with 403). Generate a deployment
+      # config that lists all currently-archived repos so safe-settings skips
+      # them. Re-runs daily via the schedule pick up newly archived repos.
+      - name: Generate deployment-settings.yml
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          {
+            echo '---'
+            echo 'restrictedRepos:'
+            echo '  exclude:'
+            echo '    - .github'
+            echo '    - admin'
+            echo '    - safe-settings'
+            gh repo list "$OWNER" --limit 200 --json name,isArchived \
+              --jq '.[] | select(.isArchived) | "    - " + .name'
+          } > deployment-settings.yml
+          cat deployment-settings.yml
+
       - name: Run safe-settings full-sync
         working-directory: ${{ env.SAFE_SETTINGS_DIR }}
         env:
@@ -57,5 +87,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.BOT_APP_PRIVATE_KEY }}
           ADMIN_REPO: .github
           CONFIG_PATH: .github/safe-settings
+          DEPLOYMENT_CONFIG_FILE: ${{ github.workspace }}/deployment-settings.yml
           FULL_SYNC_NOP: ${{ inputs.dryRun || 'false' }}
         run: npm run full-sync

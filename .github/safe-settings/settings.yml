@@ -24,8 +24,9 @@ repository:
   allow_update_branch: true
   delete_branch_on_merge: true
 
-  # Commits
-  web_commit_signoff_required: true
+  # NOTE: web_commit_signoff_required is enforced at the org level.
+  # Don't set it here — the API rejects any per-repo PATCH on the field
+  # (even setting it to the same value) when org enforcement is on.
 
 labels:
   exclude:
