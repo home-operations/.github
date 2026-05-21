@@ -1,0 +1,14 @@
+# Per-repo overrides go here as <repo-name>.yml. Files are deep-merged on top
+# of ../settings.yml. Example:
+#
+#   # .github/safe-settings/repos/tuppr.yml
+#   repository:
+#     description: Kubernetes operator for upgrading Talos and Kubernetes
+#     homepage: https://github.com/home-operations/tuppr
+#   topics:
+#     - kubernetes
+#     - operator
+#     - talos
+#
+# To opt a repo out entirely, set:
+#   enabled: false
