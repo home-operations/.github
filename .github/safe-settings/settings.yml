@@ -2,31 +2,13 @@
 # Org-wide defaults applied to every repo by .github/workflows/safe-settings.yaml.
 # Per-repo overrides live in .github/safe-settings/repos/<repo-name>.yml.
 # Schema: https://github.com/github/safe-settings/blob/main/docs/sample-settings/settings.yml
-
-repository:
-  default_branch: main
-
-  # Features
-  has_issues: true
-  has_projects: false
-  has_wiki: false
-  has_discussions: false
-  has_downloads: false
-  is_template: false
-
-  # Pull requests
-  allow_merge_commit: false
-  allow_squash_merge: true
-  squash_merge_commit_title: PR_TITLE
-  squash_merge_commit_message: BLANK
-  allow_rebase_merge: false
-  allow_auto_merge: true
-  allow_update_branch: true
-  delete_branch_on_merge: true
-
-  # NOTE: web_commit_signoff_required is enforced at the org level.
-  # Don't set it here — the API rejects any per-repo PATCH on the field
-  # (even setting it to the same value) when org enforcement is on.
+#
+# Labels-only by intent. The `repository:` plugin in safe-settings 2.1.x
+# has a race condition: updateRepos() mutates `this.config.repository`
+# in place while eachRepositoryRepos processes repos via Promise.all, so
+# parallel iterations clobber each other's `name`/`org` fields. Until
+# upstream fixes it, manage repo-level settings (default_branch, merge
+# modes, features, …) through org policy or by hand.
 
 labels:
   exclude:
