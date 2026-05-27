@@ -23,7 +23,7 @@ stage_fixed = true
 
 [pre-commit.commands.mise-lock]
 glob = [".mise.toml"]
-run = "mise lock && git add mise.lock"
+run = "mise lock && { [ -f mise.lock ] && git add mise.lock || true; }"
 
 [pre-commit.commands.shellcheck]
 glob = ["*.sh"]
