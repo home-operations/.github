@@ -1,5 +1,5 @@
 [tools]
-lefthook = "2.1.8"
+lefthook = "2.1.9"
 node = "22.22.3"
 shellcheck = "0.11.0"
 yamlfmt = "0.21.0"
