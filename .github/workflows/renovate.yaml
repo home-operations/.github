@@ -52,6 +52,7 @@ jobs:
           permission-members: read
           permission-pull-requests: write
           permission-statuses: write
+          permission-vulnerability-alerts: read
           permission-workflows: write
 
       - name: Renovate
