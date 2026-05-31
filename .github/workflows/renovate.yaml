@@ -46,9 +46,12 @@ jobs:
           client-id: ${{ secrets.BOT_CLIENT_ID }}
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }} # zizmor: ignore[github-app] org-wide access is required for Renovate autodiscover
+          permission-checks: write
           permission-contents: write
           permission-issues: write
+          permission-members: read
           permission-pull-requests: write
+          permission-statuses: write
           permission-workflows: write
 
       - name: Renovate
