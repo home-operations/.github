@@ -68,3 +68,4 @@ jobs:
           RENOVATE_CUSTOM_ENV_VARIABLES: '{"MISE_TRUSTED_CONFIG_PATHS":"/tmp/renovate/repos"}'
         with:
           token: ${{ steps.app-token.outputs.token }}
+          renovate-version: full # mise lock requires npm
