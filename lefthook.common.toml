@@ -7,6 +7,11 @@ glob = ["*.go"]
 run = "gofmt -s -w {staged_files}"
 stage_fixed = true
 
+[pre-commit.commands.format-rust]
+glob = ["*.rs"]
+run = "cargo fmt --all"
+stage_fixed = true
+
 [pre-commit.commands.format-just]
 glob = ["*.just", ".justfile"]
 run = 'for f in {staged_files}; do just --justfile "$f" --fmt; done'
