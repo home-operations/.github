@@ -1,5 +1,6 @@
 [pre-commit]
 parallel = true
+skip = ["merge", "rebase"]
 
 [pre-commit.commands.format-go]
 glob = ["*.go"]
@@ -8,11 +9,11 @@ stage_fixed = true
 
 [pre-commit.commands.format-just]
 glob = ["*.just", ".justfile"]
-run = "for f in {staged_files}; do just --justfile $f --fmt; done"
+run = 'for f in {staged_files}; do just --justfile "$f" --fmt; done'
 stage_fixed = true
 
 [pre-commit.commands.format-mise]
-glob = [".mise.toml"]
+glob = [".mise.toml", ".mise/config.toml"]
 run = "mise fmt"
 stage_fixed = true
 
@@ -32,8 +33,8 @@ run = "oxfmt {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.mise-lock]
-glob = [".mise.toml"]
-run = "mise lock && { [ -f mise.lock ] && git add mise.lock || true; }"
+glob = [".mise.toml", ".mise/config.toml"]
+run = 'mise lock && { for f in {staged_files}; do l="$(dirname "$f")/mise.lock"; [ -f "$l" ] && git add "$l"; done; true; }'
 
 [pre-commit.commands.shellcheck]
 glob = ["*.sh"]
