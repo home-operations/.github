@@ -23,7 +23,7 @@ permissions:
 
 env:
   # renovate: datasource=github-releases depName=github/safe-settings
-  SAFE_SETTINGS_VERSION: 2.1.18
+  SAFE_SETTINGS_VERSION: 2.1.21
   SAFE_SETTINGS_DIR: ${{ github.workspace }}/.safe-settings
 
 jobs:
