@@ -67,6 +67,9 @@ jobs:
           RENOVATE_PLATFORM_COMMIT: true
           RENOVATE_CUSTOM_ENV_VARIABLES: '{"MISE_TRUSTED_CONFIG_PATHS":"/tmp/renovate/repos"}'
           RENOVATE_ALLOWED_UNSAFE_EXECUTIONS: '["goGenerate", "mise"]'
+          # Allowlist the chart-doc regeneration commands used by per-repo
+          # postUpgradeTasks (helm-docs + helm-schema ship in the entrypoint above).
+          RENOVATE_ALLOWED_COMMANDS: '["^helm-docs ", "^helm-schema "]'
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root
