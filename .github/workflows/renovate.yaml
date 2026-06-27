@@ -67,7 +67,7 @@ jobs:
           RENOVATE_PLATFORM_COMMIT: true
           RENOVATE_CUSTOM_ENV_VARIABLES: '{"MISE_TRUSTED_CONFIG_PATHS":"/tmp/renovate/repos"}'
           RENOVATE_ALLOWED_UNSAFE_EXECUTIONS: '["goGenerate", "mise"]'
-          RENOVATE_ALLOWED_COMMANDS: '["^helm-docs ", "^helm-schema ", "^cargo update "]]'
+          RENOVATE_ALLOWED_COMMANDS: '["^helm-docs ", "^helm-schema ", "^cargo update "]'
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root
