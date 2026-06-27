@@ -1,0 +1,6 @@
+---
+rules:
+  github-app:
+    ignore:
+      - renovate.yaml
+      - safe-settings.yaml
