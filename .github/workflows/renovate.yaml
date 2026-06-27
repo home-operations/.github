@@ -28,9 +28,9 @@ on:
         type: choice
         default: enabled
         options:
-          - enabled # restore + reuse the cache (the scheduled default)
-          - disabled # ignore the cache entirely
-          - reset # rebuild the cache from scratch this run
+          - enabled
+          - disabled
+          - reset
 
 permissions:
   contents: read
@@ -54,7 +54,7 @@ jobs:
         with:
           client-id: ${{ secrets.BOT_CLIENT_ID }}
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }} # org-wide access is required for Renovate autodiscover
+          owner: ${{ github.repository_owner }}
           permission-checks: write
           permission-contents: write
           permission-issues: write
@@ -64,11 +64,6 @@ jobs:
           permission-vulnerability-alerts: read
           permission-workflows: write
 
-      # Restore the per-repo extraction cache (deps + branch/PR state) so an
-      # unchanged repo is skipped instead of re-scanned. The runner is ephemeral,
-      # so it round-trips through actions/cache. A run-scoped key with a shared
-      # restore-keys prefix means each run restores the latest cache and saves a
-      # fresh one — no immutable-key clash and no cache deletion needed.
       - name: Restore Renovate repository cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -96,23 +91,13 @@ jobs:
           RENOVATE_CUSTOM_ENV_VARIABLES: '{"MISE_TRUSTED_CONFIG_PATHS":"/tmp/renovate/repos"}'
           RENOVATE_ALLOWED_UNSAFE_EXECUTIONS: '["goGenerate", "mise"]'
           RENOVATE_ALLOWED_COMMANDS: '["^helm-docs ", "^helm-schema ", "^cargo update "]'
-          # Persist per-repo extraction across runs (restored/saved via the cache
-          # steps) so an unchanged repo is skipped, not re-scanned. A manual run
-          # can override this — e.g. "reset" to rebuild a stale cache.
           RENOVATE_REPOSITORY_CACHE: ${{ inputs.repoCache || 'enabled' }}
-          # Resolve the shared renovate-config preset once and reuse it for every
-          # repo in the run instead of re-fetching it per repo.
           RENOVATE_PRESET_CACHE_PERSISTENCE: "true"
         with:
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root
           token: ${{ steps.app-token.outputs.token }}
-          # Pin the Renovate version for reproducible runs and a stable cache schema.
-          # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-          renovate-version: 43.244.4
 
-      # Save the (container-owned, world-readable) repository cache for the next
-      # run. Always run so a failed run still persists the progress it made.
       - name: Save Renovate repository cache
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

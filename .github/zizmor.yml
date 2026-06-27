@@ -1,9 +1,4 @@
 ---
-# The Renovate and safe-settings bots use an org-wide GitHub App installation
-# token: both must operate across every repository in the org (Renovate
-# autodiscovers and opens PRs across all repos; safe-settings lists all repos to
-# apply org policy), so scoping the token to a fixed repository list would defeat
-# their purpose. The per-permission scopes on each token are still kept minimal.
 rules:
   github-app:
     ignore:
