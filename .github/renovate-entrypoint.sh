@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # renovate: datasource=github-releases depName=containerbase/node-prebuild
-NODE_VERSION=24.18.0
+NODE_VERSION=26.4.0
 install-tool node "${NODE_VERSION}"
 node -v
 npm -v
