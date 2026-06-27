@@ -58,17 +58,3 @@ labels:
     - name: type/major
       color: f6412d
       description: Issue relates to a major version bump
-
-    # Renovate manager types
-    - name: renovate/container
-      color: 027fa0
-      description: Pull request updates a container image
-    - name: renovate/github-action
-      color: 027fa0
-      description: Pull request updates a GitHub Action
-    - name: renovate/github-release
-      color: 027fa0
-      description: Pull request updates a GitHub release
-    - name: renovate/helm
-      color: 027fa0
-      description: Pull request updates a Helm chart
