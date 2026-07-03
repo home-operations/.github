@@ -1,0 +1,23 @@
+---
+version: 2
+# Shared goreleaser partial for the org's Go CLIs (flate, yayamlls) — include
+# AFTER goreleaser.common.yaml. Go-specific blocks only; see the composition
+# rule in goreleaser.common.yaml (each top-level key lives in exactly one
+# file). The per-repo config keeps `builds` and `homebrew_casks` — names,
+# paths, and metadata differ per project.
+
+before:
+  hooks:
+    - go mod tidy
+
+# Applies to all builds (no `ids` filter — each repo defines exactly one).
+archives:
+  - format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+upx:
+  - enabled: true
+    compress: best
+    lzma: true

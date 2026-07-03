@@ -1,0 +1,43 @@
+---
+version: 2
+# Shared goreleaser partial for every home-operations CLI release, pulled in
+# via goreleaser Pro's `includes.from_url` (like lefthook.common.toml is for
+# hooks). Language-agnostic blocks only — Go-specific ones live in
+# goreleaser.go-cli.yaml.
+#
+# Rule for composing with a repo's local config: each top-level key must be
+# defined in exactly ONE file (here or locally, never both) — goreleaser does
+# not document list/map merge semantics across includes, so overlap is
+# undefined behavior.
+#
+# Consumers: flate, yayamlls (kopiur can adopt once its release PR lands).
+# Changes here apply to every consumer's NEXT release — treat edits like a
+# shared-workflow change.
+
+# Split per-artifact .sha256 files (not one big checksums.txt).
+checksum:
+  algorithm: sha256
+  split: true
+
+sboms:
+  - artifacts: archive
+    documents:
+      - "{{ .ArtifactName }}.sbom.json"
+
+# Keyless Cosign bundle per artifact, verifiable with
+# `cosign verify-blob --bundle <artifact>.sigstore.json <artifact>`.
+signs:
+  - cmd: cosign
+    signature: ${artifact}.sigstore.json
+    args:
+      - sign-blob
+      - --bundle=${signature}
+      - --yes
+      - ${artifact}
+    artifacts: all
+    output: true
+
+# release-please creates the GitHub Release with the changelog; goreleaser
+# only attaches binaries/sboms/sigs to it.
+release:
+  mode: keep-existing
