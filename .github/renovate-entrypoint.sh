@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# renovate: datasource=github-releases depName=containerbase/node-prebuild
-NODE_VERSION=26.4.0
-install-tool node "${NODE_VERSION}"
-node -v
-npm -v
-
 # renovate: datasource=github-releases depName=norwoodj/helm-docs
 HELM_DOCS_VERSION=1.14.2
 curl -fsSL \
