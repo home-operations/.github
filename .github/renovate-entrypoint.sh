@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# node/npm are intentionally not installed here. Renovate's mise manager
-# provisions its own resolver tools (node, npm, golang, ruby) during `mise lock`
-# as of renovate/renovate 43.247+ (renovatebot/renovate#44174) — that is what
-# our `npm:oxfmt` mise tool needs to resolve. helm-docs/helm-schema below are
-# not Renovate-provided, so they stay.
-
 # renovate: datasource=github-releases depName=norwoodj/helm-docs
 HELM_DOCS_VERSION=1.14.2
 curl -fsSL \
