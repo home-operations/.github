@@ -6,27 +6,6 @@ The following is a set of guidelines for contributing to any [home-operations](h
 
 These are mostly guidelines, not rules — use your best judgment, and feel free to propose changes in a pull request.
 
-## Table of contents
-
-- [Contribution Guidelines](#contribution-guidelines)
-    - [Table of contents](#table-of-contents)
-    - [Why?](#why)
-    - [AI Usage Policy](#ai-usage-policy)
-    - [Before Getting Started](#before-getting-started)
-        - [Learn about our code of conduct](#learn-about-our-code-of-conduct)
-        - [Got a Question or Problem?](#got-a-question-or-problem)
-    - [Different contributions](#different-contributions)
-        - [Found a bug?](#found-a-bug)
-        - [Found a security vulnerability?](#found-a-security-vulnerability)
-        - [Missing a Feature?](#missing-a-feature)
-        - [Want to improve the documentation?](#want-to-improve-the-documentation)
-    - [Submission Guidelines](#submission-guidelines)
-        - [Submitting an Issue](#submitting-an-issue)
-        - [Naming a Pull Request (PR)](#naming-a-pull-request-pr)
-        - [Submitting a Pull Request](#submitting-a-pull-request)
-        - [Reviewing a Pull Request](#reviewing-a-pull-request)
-    - [Your First Contribution](#your-first-contribution)
-
 ## Why?
 
 Following these guidelines helps to communicate that you respect the time of the developers managing and developing this open-source project. In return, they should reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests.
@@ -135,11 +114,11 @@ Examples:
 
 - `feat: add option for custom log level`
 
-    This pull request introduces a new configuration option.
+  This pull request introduces a new configuration option.
 
 - `fix!: rename deprecated config key`
 
-    This pull request fixes a bug, and indicates that the change is backwards-incompatible (the `!` after the type).
+  This pull request fixes a bug, and indicates that the change is backwards-incompatible (the `!` after the type).
 
 > [!TIP]
 > If your work consists of a single commit, creating a pull request will default to the name of that commit. If you use conventional commit style for that single commit, your pull request already has the correct name.
@@ -158,9 +137,9 @@ Before you submit your pull request consider the following guidelines:
 
 1. Make your changes in a new git branch:
 
-    ```shell
-    git checkout -b feature/my-fix-branch main
-    ```
+   ```shell
+   git checkout -b feature/my-fix-branch main
+   ```
 
 1. Create your patch, include tests if necessary.
 
@@ -168,17 +147,17 @@ Before you submit your pull request consider the following guidelines:
 
 1. Commit your changes using a descriptive commit message.
 
-    ```shell
-    git commit -s -m 'Awesome commit message'
-    ```
+   ```shell
+   git commit -s -m 'Awesome commit message'
+   ```
 
-    Note: the optional commit `-a` command-line option will automatically "add" and "rm" edited files.
+   Note: the optional commit `-a` command-line option will automatically "add" and "rm" edited files.
 
 1. Push your branch to your GitHub fork:
 
-    ```shell
-    git push origin feature/my-fix-branch
-    ```
+   ```shell
+   git push origin feature/my-fix-branch
+   ```
 
 1. In GitHub, send a pull request to merge from the branch on your fork to the main branch in the upstream.
 
