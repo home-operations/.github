@@ -90,7 +90,7 @@ jobs:
           RENOVATE_PLATFORM_COMMIT: true
           RENOVATE_CUSTOM_ENV_VARIABLES: '{"MISE_TRUSTED_CONFIG_PATHS":"/tmp/renovate/repos"}'
           RENOVATE_ALLOWED_UNSAFE_EXECUTIONS: '["goGenerate", "mise"]'
-          RENOVATE_ALLOWED_COMMANDS: '["^helm-docs ", "^helm-schema ", "^mise run "]'
+          RENOVATE_ALLOWED_COMMANDS: '["^helm-docs ", "^helm-schema ", "^npm ci$", "^npm run build$"]'
           RENOVATE_REPOSITORY_CACHE: ${{ inputs.repoCache || 'enabled' }}
           RENOVATE_PRESET_CACHE_PERSISTENCE: "true"
         with:
