@@ -6,27 +6,6 @@ The following is a set of guidelines for contributing to any [home-operations](h
 
 These are mostly guidelines, not rules — use your best judgment, and feel free to propose changes in a pull request.
 
-## Table of contents
-
-- [Contribution Guidelines](#contribution-guidelines)
-  - [Table of contents](#table-of-contents)
-  - [Why?](#why)
-  - [AI Usage Policy](#ai-usage-policy)
-  - [Before Getting Started](#before-getting-started)
-    - [Learn about our code of conduct](#learn-about-our-code-of-conduct)
-    - [Got a Question or Problem?](#got-a-question-or-problem)
-  - [Different contributions](#different-contributions)
-    - [Found a bug?](#found-a-bug)
-    - [Found a security vulnerability?](#found-a-security-vulnerability)
-    - [Missing a Feature?](#missing-a-feature)
-    - [Want to improve the documentation?](#want-to-improve-the-documentation)
-  - [Submission Guidelines](#submission-guidelines)
-    - [Submitting an Issue](#submitting-an-issue)
-    - [Naming a Pull Request (PR)](#naming-a-pull-request-pr)
-    - [Submitting a Pull Request](#submitting-a-pull-request)
-    - [Reviewing a Pull Request](#reviewing-a-pull-request)
-  - [Your First Contribution](#your-first-contribution)
-
 ## Why?
 
 Following these guidelines helps to communicate that you respect the time of the developers managing and developing this open-source project. In return, they should reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests.
