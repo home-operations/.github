@@ -23,6 +23,8 @@ settings:
   allowMergeCommit: false
   allowRebaseMerge: false
   deleteBranchOnMerge: true
+  allowAutoMerge: true
+  allowUpdateBranch: true
   # Squash commits use the PR title with no body
   squashMergeCommitTitle: PR_TITLE
   squashMergeCommitMessage: BLANK
