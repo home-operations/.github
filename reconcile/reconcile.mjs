@@ -213,6 +213,14 @@ async function liveFileContent(repo, filePath) {
 const SYNC_MARKER = "<!-- reconcile:file-sync -->";
 const COMMIT_MESSAGE = filesConfig.commitMessage ?? "chore(sync): reconcile managed org files";
 
+// A commit message alone is forgeable (a cherry-pick even preserves it), so
+// tip ownership additionally requires GitHub's own web-flow committer and
+// signature — present on API-created commits and unforgeable from a CLI push.
+const tipIsReconcilers = (commit) =>
+  commit.message === COMMIT_MESSAGE &&
+  commit.committer?.email === "noreply@github.com" &&
+  commit.verification?.verified === true;
+
 async function closeStalePr(repo, branch) {
   const { data: open } = await octokit.rest.pulls.list({
     owner: ORG,
@@ -246,7 +254,7 @@ async function closeStalePr(repo, branch) {
     repo: repo.name,
     commit_sha: ref.data.object.sha,
   });
-  if (tip.message === COMMIT_MESSAGE) {
+  if (tipIsReconcilers(tip)) {
     await octokit.rest.git
       .deleteRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
       .catch(() => {});
@@ -324,7 +332,7 @@ async function reconcileFiles(repo) {
       repo: repo.name,
       commit_sha: existing.data.object.sha,
     });
-    const tipIsOurs = branchCommit.message === COMMIT_MESSAGE;
+    const tipIsOurs = tipIsReconcilers(branchCommit);
     const marked = open.some((pr) => pr.body?.includes(SYNC_MARKER));
     if (!tipIsOurs && !marked) {
       throw new Error(`branch ${branch} exists but is not owned by the reconciler; skipping`);

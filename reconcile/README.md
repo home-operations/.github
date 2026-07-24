@@ -110,3 +110,6 @@ management to work.
   model as safe-settings). Use the dry-run dispatch to preview.
 - File-sync commits are not DCO-signed; repos enforcing sign-off on the bot
   need that check relaxed for sync PRs.
+- Branch-tip ownership requires GitHub's web-flow committer and signature, so
+  sync branches created by a local (personal-token) apply are treated as
+  external by the workflow; clean those up by hand.
