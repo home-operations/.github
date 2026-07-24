@@ -177,6 +177,11 @@ async function liveFileContent(repo, filePath) {
   }
 }
 
+// Marks sync PRs as reconciler-owned so foreign branches/PRs that happen to
+// use the same branch name are never adopted, force-pushed, or closed.
+const SYNC_MARKER = "<!-- reconcile:file-sync -->";
+const COMMIT_MESSAGE = filesConfig.commitMessage ?? "chore(sync): reconcile managed org files";
+
 async function closeStalePr(repo, branch) {
   const { data: open } = await octokit.rest.pulls.list({
     owner: ORG,
@@ -185,6 +190,7 @@ async function closeStalePr(repo, branch) {
     head: `${ORG}:${branch}`,
   });
   for (const pr of open) {
+    if (!pr.body?.includes(SYNC_MARKER)) continue;
     log(repo.name, `close stale sync PR #${pr.number} (repo back in sync)`);
     if (!DRY_RUN) {
       await octokit.rest.pulls.update({
@@ -203,7 +209,11 @@ async function closeStalePr(repo, branch) {
 async function reconcileFiles(repo) {
   const targets = fileTargets(repo);
   const branch = filesConfig.branch ?? "chore/file-sync";
-  if (targets.length === 0) return;
+  // A repo excluded after a sync PR was opened must still get its PR closed.
+  if (targets.length === 0) {
+    await closeStalePr(repo, branch);
+    return;
+  }
 
   const drifted = [];
   for (const entry of targets) {
@@ -252,6 +262,12 @@ async function reconcileFiles(repo) {
   const existing = await octokit.rest.git
     .getRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
     .catch(() => null);
+  const { data: open } = await octokit.rest.pulls.list({
+    owner: ORG,
+    repo: repo.name,
+    state: "open",
+    head: `${ORG}:${branch}`,
+  });
   let upToDate = false;
   if (existing) {
     const { data: branchCommit } = await octokit.rest.git.getCommit({
@@ -259,6 +275,12 @@ async function reconcileFiles(repo) {
       repo: repo.name,
       commit_sha: existing.data.object.sha,
     });
+    const ours =
+      open.some((pr) => pr.body?.includes(SYNC_MARKER)) ||
+      (open.length === 0 && branchCommit.message === COMMIT_MESSAGE);
+    if (!ours) {
+      throw new Error(`branch ${branch} exists but is not owned by the reconciler; skipping`);
+    }
     upToDate = branchCommit.tree.sha === tree.sha && branchCommit.parents[0]?.sha === headSha;
   }
 
@@ -266,7 +288,7 @@ async function reconcileFiles(repo) {
     const { data: commit } = await octokit.rest.git.createCommit({
       owner: ORG,
       repo: repo.name,
-      message: filesConfig.commitMessage ?? "chore(sync): reconcile managed org files",
+      message: COMMIT_MESSAGE,
       tree: tree.sha,
       parents: [headSha],
     });
@@ -288,28 +310,24 @@ async function reconcileFiles(repo) {
     }
   }
 
-  const { data: open } = await octokit.rest.pulls.list({
-    owner: ORG,
-    repo: repo.name,
-    state: "open",
-    head: `${ORG}:${branch}`,
-  });
   if (open.length === 0) {
     const { data: pr } = await octokit.rest.pulls.create({
       owner: ORG,
       repo: repo.name,
       base: repo.default_branch,
       head: branch,
-      title: filesConfig.commitMessage ?? "chore(sync): reconcile managed org files",
+      title: COMMIT_MESSAGE,
       body: [
         "This repository drifted from the org-managed files in",
         `[\`${ORG}/.github\`](https://github.com/${ORG}/.github/tree/main/reconcile).`,
         "",
         ...changes.map((c) => `- ${c}`),
         "",
-        "Merge to re-sync, or exclude this repo in `reconcile/files.yml` if the",
+        "Merge to re-sync, or exclude this repo in `reconcile/files.yaml` if the",
         "divergence is intentional. This PR is regenerated while drift remains",
         "and closed automatically once the repository is back in sync.",
+        "",
+        SYNC_MARKER,
       ].join("\n"),
     });
     log(repo.name, `opened sync PR #${pr.number}`);
