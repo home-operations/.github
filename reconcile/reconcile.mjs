@@ -26,11 +26,11 @@ if (!process.env.GH_TOKEN) {
 }
 
 const root = path.dirname(new URL(import.meta.url).pathname);
-const config = YAML.parse(await fs.readFile(path.join(root, "config/settings.yml"), "utf8"));
-const filesConfig = YAML.parse(await fs.readFile(path.join(root, "files.yml"), "utf8"));
+const config = YAML.parse(await fs.readFile(path.join(root, "config/settings.yaml"), "utf8"));
+const filesConfig = YAML.parse(await fs.readFile(path.join(root, "files.yaml"), "utf8"));
 const overrides = {};
-for (const file of await glob("config/repos/*.yml", { cwd: root })) {
-  overrides[path.basename(file, ".yml")] = YAML.parse(
+for (const file of await glob("config/repos/*.yaml", { cwd: root })) {
+  overrides[path.basename(file, ".yaml")] = YAML.parse(
     await fs.readFile(path.join(root, file), "utf8"),
   );
 }
@@ -55,8 +55,15 @@ const repos = repoFilter.length ? allRepos.filter((r) => repoFilter.includes(r.n
 
 echo(`${tag} reconciling ${repos.length} repos in ${ORG} (modes: ${only.join(", ")})`);
 
+// Config uses camelCase keys; the Update Repository API wants snake_case.
+const toSnakeCase = (key) => key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+
 async function reconcileSettings(repo) {
-  const desired = { ...config.settings, ...(overrides[repo.name]?.settings ?? {}) };
+  const desired = Object.fromEntries(
+    Object.entries({ ...config.settings, ...(overrides[repo.name]?.settings ?? {}) }).map(
+      ([key, value]) => [toSnakeCase(key), value],
+    ),
+  );
   for (const key of DANGEROUS_SETTINGS) {
     if (key in desired) {
       log(repo.name, `refusing to manage dangerous setting \`${key}\``);

@@ -26,20 +26,21 @@ reviews before anything lands.
 ```text
 reconcile/
 ├── config/
-│   ├── settings.yml   # org-wide defaults: excludeRepos, settings, labels
-│   └── repos/         # per-repo overrides, one <repo-name>.yml each
+│   ├── settings.yaml   # org-wide defaults: excludeRepos, settings, labels
+│   └── repos/         # per-repo overrides, one <repo-name>.yaml each
 ├── files/             # managed file sources, mirroring destination paths
-├── files.yml          # file manifest: what syncs where
+├── files.yaml          # file manifest: what syncs where
 └── reconcile.mjs      # the reconciler
 ```
 
 ## Configuration
 
-### `config/settings.yml`
+### `config/settings.yaml`
 
 - `excludeRepos` — repos the reconciler never touches (archived repos are
   always skipped).
-- `settings` — keys passed through to the
+- `settings` — camelCase keys (e.g. `deleteBranchOnMerge`) mapped to their
+  snake_case field on the
   [Update Repository API](https://docs.github.com/rest/repos/repos#update-a-repository).
   Only listed keys are managed; everything else is left alone. `name`,
   `private`, and `visibility` are refused as too dangerous to automate.
@@ -49,10 +50,10 @@ reconcile/
   labels are never deleted.
 
 A repo's desired state is these defaults deep-merged with its
-`config/repos/<repo-name>.yml` (same shape): repo settings keys win, label
+`config/repos/<repo-name>.yaml` (same shape): repo settings keys win, label
 includes append (same-name overrides), label excludes union.
 
-### `files.yml`
+### `files.yaml`
 
 Each entry under `files:` syncs `reconcile/files/<path>` to `<path>` in its
 target repos:

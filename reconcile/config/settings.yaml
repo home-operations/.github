@@ -10,15 +10,15 @@ excludeRepos:
   - admin
   - safe-settings
 
-# Repository settings, passed through to the Update Repository API
-# (https://docs.github.com/rest/repos/repos#update-a-repository). Only keys
-# listed here are managed; everything else is left alone. `name`, `private`,
-# and `visibility` are refused by the reconciler as too dangerous to automate.
-# Empty until settings management is deliberately enabled, e.g.:
-#   allow_squash_merge: true
-#   allow_merge_commit: false
-#   allow_rebase_merge: false
-#   delete_branch_on_merge: true
+# Repository settings, camelCase keys mapped to their snake_case field on the
+# Update Repository API (https://docs.github.com/rest/repos/repos#update-a-repository).
+# Only keys listed here are managed; everything else is left alone. `name`,
+# `private`, and `visibility` are refused by the reconciler as too dangerous
+# to automate. Empty until settings management is deliberately enabled, e.g.:
+#   allowSquashMerge: true
+#   allowMergeCommit: false
+#   allowRebaseMerge: false
+#   deleteBranchOnMerge: true
 settings: {}
 
 labels:
