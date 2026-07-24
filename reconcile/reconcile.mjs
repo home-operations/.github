@@ -7,7 +7,7 @@ import { Octokit } from "octokit";
 
 const ORG = process.env.GH_ORG ?? "home-operations";
 const DRY_RUN = Boolean(argv["dry-run"]) || process.env.DRY_RUN === "true";
-const MODES = ["settings", "labels", "files"];
+const MODES = ["settings", "labels", "files", "rulesets"];
 const only = argv.only ? String(argv.only).split(",") : MODES;
 const repoFilter = (argv.repo ?? process.env.REPO_FILTER ?? "")
   .split(",")
@@ -28,6 +28,7 @@ if (!process.env.GH_TOKEN) {
 const root = path.dirname(new URL(import.meta.url).pathname);
 const config = YAML.parse(await fs.readFile(path.join(root, "config/settings.yaml"), "utf8"));
 const filesConfig = YAML.parse(await fs.readFile(path.join(root, "files.yaml"), "utf8"));
+const rulesetsConfig = YAML.parse(await fs.readFile(path.join(root, "rulesets.yaml"), "utf8"));
 const overrides = {};
 for (const file of await glob("config/repos/*.yaml", { cwd: root })) {
   overrides[path.basename(file, ".yaml")] = YAML.parse(
@@ -55,8 +56,38 @@ const repos = repoFilter.length ? allRepos.filter((r) => repoFilter.includes(r.n
 
 echo(`${tag} reconciling ${repos.length} repos in ${ORG} (modes: ${only.join(", ")})`);
 
-// Config uses camelCase keys; the Update Repository API wants snake_case.
+// Config uses camelCase keys; the GitHub APIs want snake_case.
 const toSnakeCase = (key) => key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+const toSnakeCaseDeep = (value) => {
+  if (Array.isArray(value)) return value.map(toSnakeCaseDeep);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, v]) => [toSnakeCase(key), toSnakeCaseDeep(v)]),
+    );
+  }
+  return value;
+};
+
+// Deep comparison of only the keys config declares, so extra API-side fields
+// (ids, defaults, timestamps) never register as drift. Arrays are compared
+// order-insensitively by matching each desired item to some live item.
+const subsetEqual = (desired, live) => {
+  if (Array.isArray(desired)) {
+    if (!Array.isArray(live) || desired.length !== live.length) return false;
+    const remaining = [...live];
+    return desired.every((item) => {
+      const index = remaining.findIndex((candidate) => subsetEqual(item, candidate));
+      if (index === -1) return false;
+      remaining.splice(index, 1);
+      return true;
+    });
+  }
+  if (desired && typeof desired === "object") {
+    if (!live || typeof live !== "object") return false;
+    return Object.entries(desired).every(([key, value]) => subsetEqual(value, live[key]));
+  }
+  return desired === live;
+};
 
 async function reconcileSettings(repo) {
   const desired = Object.fromEntries(
@@ -334,14 +365,53 @@ async function reconcileFiles(repo) {
   }
 }
 
+// Org rulesets are a single org-level object list, reconciled once per run
+// rather than per repo. Enforcement is GitHub's; only definitions live here.
+async function reconcileRulesets() {
+  const desired = (rulesetsConfig.rulesets ?? []).map(toSnakeCaseDeep);
+  if (desired.length === 0) return;
+  const live = await octokit.paginate("GET /orgs/{org}/rulesets", { org: ORG, per_page: 100 });
+  for (const ruleset of desired) {
+    const match = live.find((r) => r.name === ruleset.name);
+    if (!match) {
+      log("org", `create ruleset \`${ruleset.name}\``);
+      if (!DRY_RUN) await octokit.request("POST /orgs/{org}/rulesets", { org: ORG, ...ruleset });
+      continue;
+    }
+    const { data: full } = await octokit.request("GET /orgs/{org}/rulesets/{ruleset_id}", {
+      org: ORG,
+      ruleset_id: match.id,
+    });
+    if (subsetEqual(ruleset, full)) continue;
+    log("org", `update ruleset \`${ruleset.name}\``);
+    if (!DRY_RUN) {
+      await octokit.request("PUT /orgs/{org}/rulesets/{ruleset_id}", {
+        org: ORG,
+        ruleset_id: match.id,
+        ...ruleset,
+      });
+    }
+  }
+}
+
 const work = {
   settings: reconcileSettings,
   labels: reconcileLabels,
   files: reconcileFiles,
 };
 
+if (only.includes("rulesets") && repoFilter.length === 0) {
+  try {
+    await reconcileRulesets();
+  } catch (error) {
+    failures.push(`org (rulesets): ${error.message}`);
+    echo(chalk.red(`org (rulesets): ${error.message}`));
+  }
+}
+
 for (const repo of repos) {
   for (const mode of only) {
+    if (mode === "rulesets") continue;
     try {
       await work[mode](repo);
     } catch (error) {

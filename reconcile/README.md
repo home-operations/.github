@@ -16,6 +16,7 @@ input). Built with [zx](https://github.com/google/zx) and
 | settings | PATCHed directly (only the drifted keys)                         |
 | labels   | Created / updated / deleted directly                             |
 | files    | One PR per repo proposing the change; never merged automatically |
+| rulesets | Org rulesets created / updated by name (org-level, run once)     |
 
 Settings and labels are config with no CI consequences, so they apply
 directly. Files (mostly workflows) go through a PR so CI runs and a human
@@ -30,6 +31,7 @@ reconcile/
 │   └── repos/         # per-repo overrides, one <repo-name>.yaml each
 ├── files/             # managed file sources, mirroring destination paths
 ├── files.yaml          # file manifest: what syncs where
+├── rulesets.yaml       # org rulesets (branch protection et al.)
 └── reconcile.mjs      # the reconciler
 ```
 
@@ -70,6 +72,17 @@ closed automatically (branch deleted) once the repo is back in sync — so an
 intentionally divergent repo should be added to the entry's `exclude` rather
 than leaving its PR open forever.
 
+### `rulesets.yaml`
+
+Org rulesets as camelCase data converted to the
+[org rulesets API](https://docs.github.com/rest/orgs/rules) payload. Only
+rulesets named here are managed (matched by `name`, created or updated on
+drift); unlisted rulesets are left alone, and deletion is manual. GitHub
+enforces the rules — the reconciler only maintains the definitions, so this
+stays stateless. New rulesets should start with `enforcement: evaluate` and
+flip to `active` once the rulesets insights confirm the bypass list is
+complete.
+
 ## Running locally
 
 ```sh
@@ -77,22 +90,23 @@ cd reconcile && npm ci
 GH_TOKEN=$(gh auth token) node reconcile.mjs --dry-run
 ```
 
-Flags: `--dry-run` (log drift, change nothing), `--only settings,labels,files`,
-`--repo <name>[,<name>]`. The workflow passes `DRY_RUN` and `REPO_FILTER` via
-dispatch inputs.
+Flags: `--dry-run` (log drift, change nothing),
+`--only settings,labels,files,rulesets`, `--repo <name>[,<name>]` (skips the
+org-level rulesets mode). The workflow passes `DRY_RUN` and `REPO_FILTER` via
+dispatch inputs. Note that reading org rulesets locally requires a token with
+the `admin:org` scope.
 
 ## Token permissions
 
 The workflow mints a bot app token with `administration`, `contents`,
-`issues`, `pull-requests`, and `workflows` write. The bot app installation
-must be granted the repository Administration permission for settings
+`issues`, `organization-administration`, `pull-requests`, and `workflows`
+write. The bot app must be granted the repository **Administration** and
+organization **Administration** permissions for settings and rulesets
 management to work.
 
 ## Limitations
 
-- No approval gate for settings/labels — each run enforces (same model as
-  safe-settings). Use the dry-run dispatch to preview.
+- No approval gate for settings/labels/rulesets — each run enforces (same
+  model as safe-settings). Use the dry-run dispatch to preview.
 - File-sync commits are not DCO-signed; repos enforcing sign-off on the bot
   need that check relaxed for sync PRs.
-- Branch protection and push rules are intentionally out of scope — manage
-  those with org rulesets.

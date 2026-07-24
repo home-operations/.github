@@ -59,6 +59,7 @@ jobs:
           permission-administration: write
           permission-contents: write
           permission-issues: write
+          permission-organization-administration: write
           permission-pull-requests: write
           permission-workflows: write
 
