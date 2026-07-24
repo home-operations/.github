@@ -221,6 +221,24 @@ const tipIsReconcilers = (commit) =>
   commit.committer?.email === "noreply@github.com" &&
   commit.verification?.verified === true;
 
+// Compare-and-swap ref update: fails if the ref moved after its tip was
+// verified, so a concurrent external push can never be overwritten between
+// the ownership check and the mutation. Deleting passes the all-zero OID.
+const ZERO_OID = "0".repeat(40);
+async function casUpdateRef(repo, branch, beforeOid, afterOid) {
+  await octokit.graphql(
+    `mutation ($repositoryId: ID!, $refUpdates: [RefUpdate!]!) {
+      updateRefs(input: { repositoryId: $repositoryId, refUpdates: $refUpdates }) {
+        clientMutationId
+      }
+    }`,
+    {
+      repositoryId: repo.node_id,
+      refUpdates: [{ name: `refs/heads/${branch}`, afterOid, beforeOid, force: true }],
+    },
+  );
+}
+
 async function closeStalePr(repo, branch) {
   const { data: open } = await octokit.rest.pulls.list({
     owner: ORG,
@@ -245,21 +263,28 @@ async function closeStalePr(repo, branch) {
     log(repo.name, `left sync PR and branch \`${branch}\` in place (external commits on tip)`);
     return;
   }
+  if (DRY_RUN) {
+    for (const pr of marked) {
+      log(repo.name, `close stale sync PR #${pr.number} (repo back in sync)`);
+    }
+    return;
+  }
+  // Delete before closing: if the ref moved since verification the CAS fails
+  // and the PR stays open for the next run to re-evaluate.
+  try {
+    await casUpdateRef(repo, branch, ref.data.object.sha, ZERO_OID);
+  } catch {
+    log(repo.name, `left sync PR and branch \`${branch}\` in place (ref moved during cleanup)`);
+    return;
+  }
   for (const pr of marked) {
     log(repo.name, `close stale sync PR #${pr.number} (repo back in sync)`);
-    if (!DRY_RUN) {
-      await octokit.rest.pulls.update({
-        owner: ORG,
-        repo: repo.name,
-        pull_number: pr.number,
-        state: "closed",
-      });
-    }
-  }
-  if (!DRY_RUN) {
-    await octokit.rest.git
-      .deleteRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
-      .catch(() => {});
+    await octokit.rest.pulls.update({
+      owner: ORG,
+      repo: repo.name,
+      pull_number: pr.number,
+      state: "closed",
+    });
   }
 }
 
@@ -355,13 +380,9 @@ async function reconcileFiles(repo) {
       parents: [headSha],
     });
     if (existing) {
-      await octokit.rest.git.updateRef({
-        owner: ORG,
-        repo: repo.name,
-        ref: `heads/${branch}`,
-        sha: commit.sha,
-        force: true,
-      });
+      // CAS against the verified tip: a concurrent external push makes this
+      // throw instead of being overwritten; the next run re-evaluates.
+      await casUpdateRef(repo, branch, existing.data.object.sha, commit.sha);
     } else {
       await octokit.rest.git.createRef({
         owner: ORG,
