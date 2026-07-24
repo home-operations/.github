@@ -13,26 +13,3 @@ commitMessage: "chore(sync): reconcile managed org files"
 
 files:
   - path: .github/workflows/renovate.yaml
-    repos:
-      - charts-mirror
-      - chaski
-      - containers
-      - downflate
-      - drm-exporter
-      - echo
-      - external-dns-unifi-webhook
-      - flate
-      - gatus-sidecar
-      - helm-charts
-      - home-operations.github.io
-      - homebrew-tap
-      - k8s-schemas
-      - konflate
-      - kopiur
-      - kromgo
-      - litellm-operator
-      - miroir
-      - renovate-presets
-      - talosctl-cluster-action
-      - tuppr
-      - yayamlls
