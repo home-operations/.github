@@ -228,23 +228,10 @@ async function closeStalePr(repo, branch) {
     state: "open",
     head: `${ORG}:${branch}`,
   });
-  let closedAny = false;
-  for (const pr of open) {
-    if (!pr.body?.includes(SYNC_MARKER)) continue;
-    log(repo.name, `close stale sync PR #${pr.number} (repo back in sync)`);
-    closedAny = true;
-    if (!DRY_RUN) {
-      await octokit.rest.pulls.update({
-        owner: ORG,
-        repo: repo.name,
-        pull_number: pr.number,
-        state: "closed",
-      });
-    }
-  }
-  if (!closedAny || DRY_RUN) return;
-  // Delete the branch only when its tip is still reconciler-authored; a tip
-  // someone else pushed must never be deleted along with the obsolete PR.
+  const marked = open.filter((pr) => pr.body?.includes(SYNC_MARKER));
+  if (marked.length === 0) return;
+  // External commits on the sync branch mean a human took the proposal over;
+  // leave both the PR and the branch entirely alone.
   const ref = await octokit.rest.git
     .getRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
     .catch(() => null);
@@ -254,12 +241,25 @@ async function closeStalePr(repo, branch) {
     repo: repo.name,
     commit_sha: ref.data.object.sha,
   });
-  if (tipIsReconcilers(tip)) {
+  if (!tipIsReconcilers(tip)) {
+    log(repo.name, `left sync PR and branch \`${branch}\` in place (external commits on tip)`);
+    return;
+  }
+  for (const pr of marked) {
+    log(repo.name, `close stale sync PR #${pr.number} (repo back in sync)`);
+    if (!DRY_RUN) {
+      await octokit.rest.pulls.update({
+        owner: ORG,
+        repo: repo.name,
+        pull_number: pr.number,
+        state: "closed",
+      });
+    }
+  }
+  if (!DRY_RUN) {
     await octokit.rest.git
       .deleteRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
       .catch(() => {});
-  } else {
-    log(repo.name, `left branch \`${branch}\` in place (external commits on tip)`);
   }
 }
 
