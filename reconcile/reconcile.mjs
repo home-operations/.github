@@ -216,10 +216,14 @@ const COMMIT_MESSAGE = filesConfig.commitMessage ?? "chore(sync): reconcile mana
 // A commit message alone is forgeable (a cherry-pick even preserves it), so
 // tip ownership additionally requires GitHub's own web-flow committer and
 // signature — present on API-created commits and unforgeable from a CLI push.
+// The [bot] author closes the web-editor hole: GitHub's web UI also produces
+// web-flow-signed commits, but always with the human as author, and no
+// non-app path can pair a [bot] author with a valid web-flow signature.
 const tipIsReconcilers = (commit) =>
   commit.message === COMMIT_MESSAGE &&
   commit.committer?.email === "noreply@github.com" &&
-  commit.verification?.verified === true;
+  commit.verification?.verified === true &&
+  /\[bot\]@users\.noreply\.github\.com$/.test(commit.author?.email ?? "");
 
 // Compare-and-swap ref update: fails if the ref moved after its tip was
 // verified, so a concurrent external push can never be overwritten between
