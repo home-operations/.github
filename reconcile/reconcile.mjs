@@ -220,9 +220,11 @@ async function closeStalePr(repo, branch) {
     state: "open",
     head: `${ORG}:${branch}`,
   });
+  let closedAny = false;
   for (const pr of open) {
     if (!pr.body?.includes(SYNC_MARKER)) continue;
     log(repo.name, `close stale sync PR #${pr.number} (repo back in sync)`);
+    closedAny = true;
     if (!DRY_RUN) {
       await octokit.rest.pulls.update({
         owner: ORG,
@@ -230,10 +232,26 @@ async function closeStalePr(repo, branch) {
         pull_number: pr.number,
         state: "closed",
       });
-      await octokit.rest.git
-        .deleteRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
-        .catch(() => {});
     }
+  }
+  if (!closedAny || DRY_RUN) return;
+  // Delete the branch only when its tip is still reconciler-authored; a tip
+  // someone else pushed must never be deleted along with the obsolete PR.
+  const ref = await octokit.rest.git
+    .getRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
+    .catch(() => null);
+  if (!ref) return;
+  const { data: tip } = await octokit.rest.git.getCommit({
+    owner: ORG,
+    repo: repo.name,
+    commit_sha: ref.data.object.sha,
+  });
+  if (tip.message === COMMIT_MESSAGE) {
+    await octokit.rest.git
+      .deleteRef({ owner: ORG, repo: repo.name, ref: `heads/${branch}` })
+      .catch(() => {});
+  } else {
+    log(repo.name, `left branch \`${branch}\` in place (external commits on tip)`);
   }
 }
 
@@ -306,11 +324,16 @@ async function reconcileFiles(repo) {
       repo: repo.name,
       commit_sha: existing.data.object.sha,
     });
-    const ours =
-      open.some((pr) => pr.body?.includes(SYNC_MARKER)) ||
-      (open.length === 0 && branchCommit.message === COMMIT_MESSAGE);
-    if (!ours) {
+    const tipIsOurs = branchCommit.message === COMMIT_MESSAGE;
+    const marked = open.some((pr) => pr.body?.includes(SYNC_MARKER));
+    if (!tipIsOurs && !marked) {
       throw new Error(`branch ${branch} exists but is not owned by the reconciler; skipping`);
+    }
+    // A marked PR whose tip is no longer ours means someone pushed their own
+    // commits onto the sync branch; never force-push over external work.
+    if (!tipIsOurs) {
+      log(repo.name, `sync branch has external commits; leaving the open sync PR untouched`);
+      return;
     }
     upToDate = branchCommit.tree.sha === tree.sha && branchCommit.parents[0]?.sha === headSha;
   }
