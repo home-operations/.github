@@ -56,12 +56,11 @@ jobs:
           client-id: ${{ secrets.BOT_CLIENT_ID }}
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          permission-administration: write
           permission-contents: write
           permission-issues: write
           permission-pull-requests: write
           permission-workflows: write
-          # Required once settings management is enabled in reconcile/config:
-          # permission-administration: write
 
       - name: Reconcile
         working-directory: reconcile

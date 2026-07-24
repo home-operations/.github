@@ -83,9 +83,10 @@ dispatch inputs.
 
 ## Token permissions
 
-The workflow mints a bot app token with `contents`, `issues`, `pull-requests`,
-and `workflows` write. Enabling settings management additionally requires
-`administration: write` (commented in the workflow until needed).
+The workflow mints a bot app token with `administration`, `contents`,
+`issues`, `pull-requests`, and `workflows` write. The bot app installation
+must be granted the repository Administration permission for settings
+management to work.
 
 ## Limitations
 

@@ -14,12 +14,11 @@ excludeRepos:
 # Update Repository API (https://docs.github.com/rest/repos/repos#update-a-repository).
 # Only keys listed here are managed; everything else is left alone. `name`,
 # `private`, and `visibility` are refused by the reconciler as too dangerous
-# to automate. Empty until settings management is deliberately enabled, e.g.:
-#   allowSquashMerge: true
-#   allowMergeCommit: false
-#   allowRebaseMerge: false
-#   deleteBranchOnMerge: true
-settings: {}
+# to automate.
+settings:
+  # Squash commits use the PR title with no body
+  squashMergeCommitTitle: PR_TITLE
+  squashMergeCommitMessage: BLANK
 
 labels:
   exclude:
