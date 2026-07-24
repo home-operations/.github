@@ -16,6 +16,8 @@ excludeRepos:
 # `private`, and `visibility` are refused by the reconciler as too dangerous
 # to automate.
 settings:
+  hasDiscussions: false
+  hasWiki: false
   # Squash-only merges with automatic branch cleanup
   allowSquashMerge: true
   allowMergeCommit: false
