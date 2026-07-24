@@ -5,11 +5,9 @@ name: Renovate
 on:
   schedule:
     - cron: "20 * * * *"
-  # Reactive runs: a per-repo dispatcher fires this when a Dependency Dashboard
-  # checkbox is ticked or a Renovate PR is merged. client_payload.repository
-  # scopes the run to just that repo (see RENOVATE_AUTODISCOVER_FILTER below).
   repository_dispatch:
-    types: [renovate-trigger]
+    types: 
+      - renovate-trigger
   workflow_dispatch:
     inputs:
       dryRun:
@@ -40,9 +38,6 @@ on:
 permissions:
   contents: read
 
-# Only one Renovate run at a time. A reactive repository_dispatch must not race
-# a scheduled full sweep on the same repo's branches/PRs; queue it instead
-# (cancel-in-progress: false keeps at most one pending, collapsing bursts).
 concurrency:
   group: renovate
   cancel-in-progress: false
