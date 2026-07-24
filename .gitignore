@@ -6,3 +6,4 @@
 /.task/
 /.venv/
 Thumbs.db
+node_modules/
