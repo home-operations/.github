@@ -1,0 +1,35 @@
+---
+# Org rulesets managed by the reconciler, camelCase keys converted to the
+# org rulesets API payload (https://docs.github.com/rest/orgs/rules). Only
+# rulesets named here are managed; anything else is left alone. Enforcement
+# is done by GitHub itself — the reconciler only maintains the definitions.
+
+rulesets:
+  - name: default-branch-protection
+    target: branch
+    # evaluate audits without blocking; flip to active once the rulesets
+    # insights confirm the bypass list covers all legitimate direct pushes.
+    enforcement: evaluate
+    bypassActors:
+      # Sticky Gecko: Renovate branch-automerge and file sync push directly
+      - actorId: 1181538
+        actorType: Integration
+        bypassMode: always
+    conditions:
+      refName:
+        include: ["~DEFAULT_BRANCH"]
+        exclude: []
+      repositoryName:
+        include: ["~ALL"]
+        exclude: []
+    rules:
+      # No direct commits: changes reach the default branch through a PR
+      - type: pull_request
+        parameters:
+          requiredApprovingReviewCount: 0
+          dismissStaleReviewsOnPush: false
+          requireCodeOwnerReview: false
+          requireLastPushApproval: false
+          requiredReviewThreadResolution: false
+      - type: non_fast_forward
+      - type: deletion
