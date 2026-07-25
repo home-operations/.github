@@ -27,15 +27,14 @@ rulesets:
               integration_id: 15368
 
       # Merge through a queue rather than directly, so each pull request is
-      # tested against the result of the ones ahead of it. This is what keeps the
-      # strict up-to-date requirement from serialising merges by hand: without a
-      # queue every merge invalidates the other open pull requests and each has
-      # to rebase and re-run CI.
+      # tested against the result of the ones ahead of it instead of racing them.
+      # Without a queue, `strict` makes concurrent merges serial: the first to
+      # land leaves every other open pull request behind main, and each has to be
+      # rebased and re-tested one at a time.
       #
-      # Only these three repos queue, because only they had a queue before the
-      # org-wide rulesets and they carry the most pull request traffic. Every
-      # repo's CI now triggers on `merge_group`, so the rule could be added
-      # elsewhere without touching a workflow.
+      # The queue builds a temporary ref per entry containing main plus every
+      # entry ahead of it, which is why CI triggers on `merge_group`. A pull
+      # request branch is never rebased for this.
       - type: merge_queue
         parameters:
           # Give up on an entry whose checks never report back.

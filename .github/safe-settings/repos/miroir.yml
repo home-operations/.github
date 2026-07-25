@@ -25,3 +25,26 @@ rulesets:
           required_status_checks:
             - context: Build Success
               integration_id: 15368
+
+      # Merge through a queue rather than directly, so each pull request is
+      # tested against the result of the ones ahead of it instead of racing them.
+      # Without a queue, `strict` makes concurrent merges serial: the first to
+      # land leaves every other open pull request behind main, and each has to be
+      # rebased and re-tested one at a time.
+      #
+      # The queue builds a temporary ref per entry containing main plus every
+      # entry ahead of it, which is why CI triggers on `merge_group`. A pull
+      # request branch is never rebased for this.
+      - type: merge_queue
+        parameters:
+          # Give up on an entry whose checks never report back.
+          check_response_timeout_minutes: 60
+          # Only merge a group if every entry in it is green.
+          grouping_strategy: ALLGREEN
+          max_entries_to_build: 5
+          max_entries_to_merge: 5
+          merge_method: SQUASH
+          # Merge as soon as one entry is ready, after a short wait to let others
+          # join the same group.
+          min_entries_to_merge: 1
+          min_entries_to_merge_wait_minutes: 5
