@@ -1,0 +1,24 @@
+---
+# Adds to the baseline `main` ruleset in ../suborgs/all.yml. Rulesets match by
+# `name` and bypass_actors are concatenated, so this ADDS an actor rather than
+# overriding one — restating an actor the baseline already lists produces a
+# duplicate, which GitHub silently drops.
+#
+# No required status check here: this repo has no CI, and GitHub rejects a
+# required_status_checks rule with an empty check list.
+
+rulesets:
+  - name: main
+    bypass_actors:
+      # sticky-gecko, so goreleaser can push cask updates straight to main.
+      # They arrive from the release workflows in chaski, flate, kopiur and
+      # yayamlls via a token scoped to this repo (HOMEBREW_TAP_TOKEN), with no
+      # pull request to bypass on — hence `always` rather than `pull_request`.
+      # The app deliberately has no bypass anywhere else.
+      #
+      # To drop the exception, set `repository.pull_request.enabled: true` on the
+      # homebrew_casks block in all four .goreleaser.yaml files, at the cost of
+      # the tap only updating once someone merges the resulting pull request.
+      - actor_id: 1181538
+        actor_type: Integration
+        bypass_mode: always

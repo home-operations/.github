@@ -72,8 +72,6 @@ jobs:
             echo 'restrictedRepos:'
             echo '  exclude:'
             echo '    - .github'
-            echo '    - admin'
-            echo '    - safe-settings'
             gh repo list "$OWNER" --limit 200 --json name,isArchived \
               --jq '.[] | select(.isArchived) | "    - " + .name'
           } > deployment-settings.yml
