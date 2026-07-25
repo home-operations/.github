@@ -1,0 +1,79 @@
+---
+# Baseline branch protection for every repo in the org.
+#
+# Lives here rather than in settings.yml because safe-settings treats a
+# top-level `rulesets:` block as ORG-scoped (lib/settings.js passes SCOPE.ORG,
+# and returnRepoSpecificConfigs() strips it from the per-repo merge). Org-level
+# rulesets need GitHub Team or Enterprise and this org is on Free, so the
+# ruleset has to be applied per-repo — which a suborg config does.
+#
+# safe-settings owns these rulesets outright: any ruleset on a repo whose name
+# is not listed here is deleted on the next sync.
+#
+# Per-repo additions live in ../repos/<repo>.yml. Rulesets match by `name`, but
+# the lists *inside* a matched ruleset are concatenated, not merged by key — so
+# an override may only ADD rules and bypass actors. Restating one produces a
+# duplicate, which GitHub silently drops in favour of the entry defined here.
+
+suborgrepos:
+  - "*"
+
+rulesets:
+  - name: main
+    target: branch
+
+    # Active rather than evaluate: an evaluate-mode ruleset is not reported by
+    # GET /repos/{repo}/rules/branches/{branch}, so GitHub's auto-merge would not
+    # wait for the required check and Renovate would not see the strict policy
+    # that makes it keep its branches rebased. A dry run would therefore leave
+    # automerge less guarded than having no ruleset at all.
+    enforcement: active
+
+    # Only the default branch. Feature branches stay unrestricted so a PR can be
+    # force-pushed and rebased freely.
+    conditions:
+      ref_name:
+        include:
+          - "~DEFAULT_BRANCH"
+        exclude: []
+
+    # Listed in the order GitHub returns them (OrganizationAdmin, RepositoryRole,
+    # Integration) so a repo override that appends an Integration still matches
+    # the API's ordering and does not diff on every sync. Do not give
+    # OrganizationAdmin an actor_id: GitHub ignores it and stores null.
+    #
+    # No Integration bypass here by design. Renovate and release-please both run
+    # as sticky-gecko and both work through pull requests, so neither needs to
+    # bypass anything; withholding it is what stops a future automerge setting
+    # from quietly pushing to main again. homebrew-tap is the one repo that
+    # genuinely pushes direct and adds the actor back.
+    bypass_actors:
+      # Org owners, so a broken ruleset can always be fixed by hand.
+      - actor_type: OrganizationAdmin
+        bypass_mode: always
+      # Repository admin role, same escape hatch for repo-scoped admins.
+      - actor_id: 5
+        actor_type: RepositoryRole
+        bypass_mode: always
+
+    rules:
+      # Nobody may delete the default branch.
+      - type: deletion
+
+      # No force pushes: history on the default branch only ever moves forward,
+      # so a rewrite cannot drop commits others have already pulled.
+      - type: non_fast_forward
+
+      # Every change reaches the default branch through a pull request. Approvals
+      # are set to 0 — the gate here is CI, not review, so a solo maintainer can
+      # still merge their own work while the required check does the blocking.
+      - type: pull_request
+        parameters:
+          required_approving_review_count: 0
+          dismiss_stale_reviews_on_push: false
+          require_code_owner_review: false
+          require_last_push_approval: false
+          required_review_thread_resolution: false
+          # Squash only, matching every repo's merge settings.
+          allowed_merge_methods:
+            - squash

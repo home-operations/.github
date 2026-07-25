@@ -1,0 +1,51 @@
+---
+# Adds to the baseline `main` ruleset in ../suborgs/all.yml. Rulesets match by
+# `name` and rules are concatenated, so this may only add rule types the
+# baseline does not already define.
+
+rulesets:
+  - name: main
+    rules:
+      # Require CI before merge, and require the branch to be current with main
+      # first. `strict` is the "up to date before merging" half and cannot be set
+      # on its own — GitHub rejects the rule with an empty check list, which is
+      # why a single fan-in check exists at all.
+      #
+      # `Build Success` is that fan-in, in .github/workflows/pull-request.yaml.
+      # It runs `if: ${{ !cancelled() }}` so it reports whether the jobs it needs
+      # pass or skip; requiring those jobs directly would hang forever on a pull
+      # request that skips them, such as a release-please version bump.
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: true
+          # Enforce on branch creation too, not just on update.
+          do_not_enforce_on_create: false
+          # integration_id 15368 pins the check to GitHub Actions, so another app
+          # cannot satisfy it by reporting a check of the same name.
+          required_status_checks:
+            - context: Build Success
+              integration_id: 15368
+
+      # Merge through a queue rather than directly, so each pull request is
+      # tested against the result of the ones ahead of it. This is what keeps the
+      # strict up-to-date requirement from serialising merges by hand: without a
+      # queue every merge invalidates the other open pull requests and each has
+      # to rebase and re-run CI.
+      #
+      # Only these three repos queue, because only they had a queue before the
+      # org-wide rulesets and they carry the most pull request traffic. Every
+      # repo's CI now triggers on `merge_group`, so the rule could be added
+      # elsewhere without touching a workflow.
+      - type: merge_queue
+        parameters:
+          # Give up on an entry whose checks never report back.
+          check_response_timeout_minutes: 60
+          # Only merge a group if every entry in it is green.
+          grouping_strategy: ALLGREEN
+          max_entries_to_build: 5
+          max_entries_to_merge: 5
+          merge_method: SQUASH
+          # Merge as soon as one entry is ready, after a short wait to let others
+          # join the group.
+          min_entries_to_merge: 1
+          min_entries_to_merge_wait_minutes: 5

@@ -1,0 +1,27 @@
+---
+# Adds to the baseline `main` ruleset in ../suborgs/all.yml. Rulesets match by
+# `name` and rules are concatenated, so this may only add rule types the
+# baseline does not already define.
+
+rulesets:
+  - name: main
+    rules:
+      # Require CI before merge, and require the branch to be current with main
+      # first. `strict` is the "up to date before merging" half and cannot be set
+      # on its own — GitHub rejects the rule with an empty check list, which is
+      # why a single fan-in check exists at all.
+      #
+      # `Build Success` is that fan-in, in .github/workflows/ci.yaml. It runs
+      # `if: ${{ !cancelled() }}` so it reports whether the jobs it needs pass or
+      # skip; requiring those jobs directly would hang forever on a pull request
+      # that skips them, such as a release-please version bump.
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: true
+          # Enforce on branch creation too, not just on update.
+          do_not_enforce_on_create: false
+          # integration_id 15368 pins the check to GitHub Actions, so another app
+          # cannot satisfy it by reporting a check of the same name.
+          required_status_checks:
+            - context: Build Success
+              integration_id: 15368
