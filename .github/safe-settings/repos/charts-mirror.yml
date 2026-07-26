@@ -6,10 +6,14 @@
 rulesets:
   - name: main
     rules:
-      # Require CI before merge, and require the branch to be current with main
-      # first. `strict` is the "up to date before merging" half and cannot be set
-      # on its own — GitHub rejects the rule with an empty check list, which is
-      # why a single fan-in check exists at all.
+      # Require CI before merge. The rule cannot be empty — GitHub rejects it
+      # with no checks listed — which is why a single fan-in check exists at all.
+      #
+      # `strict` (require the branch to be up to date) is deliberately false: the
+      # merge queue below already tests each entry against main plus everything
+      # ahead of it, so the branch itself never needs to be current. Setting both
+      # would only re-add the rebase churn the queue exists to remove, and would
+      # make Renovate rebase branches that the queue is about to supersede.
       #
       # `Build Success` is that fan-in, in .github/workflows/pull-request.yaml.
       # It runs `if: ${{ !cancelled() }}` so it reports whether the jobs it needs
@@ -17,7 +21,7 @@ rulesets:
       # request that skips them, such as a release-please version bump.
       - type: required_status_checks
         parameters:
-          strict_required_status_checks_policy: true
+          strict_required_status_checks_policy: false
           # Enforce on branch creation too, not just on update.
           do_not_enforce_on_create: false
           # integration_id 15368 pins the check to GitHub Actions, so another app
