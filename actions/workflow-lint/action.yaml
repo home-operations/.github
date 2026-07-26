@@ -6,12 +6,10 @@ description: Lint workflows and action definitions with actionlint and zizmor
 inputs:
   actionlint-version:
     description: Version of actionlint to run
-    # renovate: datasource=github-releases depName=rhysd/actionlint
-    default: "1.7.12"
+    default: latest
   zizmor-version:
     description: Version of zizmor to run
-    # renovate: datasource=github-releases depName=zizmorcore/zizmor
-    default: "1.28.0"
+    default: latest
 
 runs:
   using: composite
