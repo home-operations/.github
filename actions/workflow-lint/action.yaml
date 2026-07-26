@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Workflow Lint
+description: Lint workflows and action definitions with actionlint and zizmor
+
+inputs:
+  actionlint-version:
+    description: Version of actionlint to run
+    default: latest
+  zizmor-version:
+    description: Version of zizmor to run
+    default: latest
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Mise
+      uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
+      with:
+        install: false
+
+    - name: Run actionlint
+      shell: bash
+      env:
+        ACTIONLINT_VERSION: ${{ inputs.actionlint-version }}
+      run: |
+        mise exec actionlint@"${ACTIONLINT_VERSION}" -- actionlint -color -shellcheck= \
+          -ignore 'unexpected key "(background|cancel|parallel|wait|wait-all)" for step' \
+          -ignore 'step must run script with "run" section or run action with "uses" section'
+
+    - name: Run zizmor
+      if: ${{ !cancelled() }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        ZIZMOR_VERSION: ${{ inputs.zizmor-version }}
+      run: |
+        mise exec zizmor@"${ZIZMOR_VERSION}" -- zizmor --color=always --no-progress .
