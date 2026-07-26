@@ -62,6 +62,19 @@ over_budget() {
   return 1
 }
 
+# Absorbs transient API failures so a rate limit or a 502 does not leave an item
+# half processed. Retries consume budget, which is intended.
+retry() {
+  local attempt=1
+  until "$@"; do
+    if ((attempt >= 3)); then
+      return 1
+    fi
+    sleep $((attempt * 2))
+    attempt=$((attempt + 1))
+  done
+}
+
 # Labels that exempt an item, as search qualifiers.
 exempt_args=()
 if [[ -n "${EXEMPT_LABELS}" ]]; then
@@ -136,13 +149,19 @@ unstale() {
 
     if (($(date -u -d "${updated_at}" +%s) - $(date -u -d "${labeled_at}" +%s) > UNSTALE_GRACE_SECONDS)); then
       printf '  revive %s\n' "${url}"
-      run gh api -X DELETE "repos/${repo}/issues/${number}/labels/${STALE_LABEL}" --silent
+      if ! retry run gh api -X DELETE "repos/${repo}/issues/${number}/labels/${STALE_LABEL}" --silent; then
+        warn "could not remove ${STALE_LABEL} from ${url}; it will be retried on the next run"
+      fi
     fi
   done <<<"${items}"
 }
 
-# Comment first, then label: the label has to be the last write so that
-# updated_at and the labeled event line up for unstale().
+# Comment first, then label. Both writes land inside UNSTALE_GRACE_SECONDS of
+# each other either way, so the ordering is chosen for how it fails rather than
+# for the revive comparison: commenting first means a failed label leaves an
+# item warned but not marked, which never closes. Labelling first would leave an
+# item marked but never warned, which closes in DAYS_BEFORE_CLOSE days without
+# anyone having been told.
 mark() {
   printf '==> Marking items untouched since %s\n' "${stale_before}"
 
@@ -154,10 +173,19 @@ mark() {
     over_budget && break
 
     printf '  mark %s\n' "${url}"
-    run gh api "repos/${repo}/issues/${number}/comments" \
-      -f "body=$(stale_body "$(noun_for "${is_pr}")")" --silent
-    run gh api "repos/${repo}/issues/${number}/labels" \
-      -f "labels[]=${STALE_LABEL}" --silent
+
+    if ! retry run gh api "repos/${repo}/issues/${number}/comments" \
+      -f "body=$(stale_body "$(noun_for "${is_pr}")")" --silent; then
+      warn "could not comment on ${url}; it will be retried on the next run"
+      continue
+    fi
+
+    # The comment already moved updated_at out of the stale window, so this item
+    # will not be reconsidered for another DAYS_BEFORE_STALE days.
+    if ! retry run gh api "repos/${repo}/issues/${number}/labels" \
+      -f "labels[]=${STALE_LABEL}" --silent; then
+      warn "commented on ${url} but could not apply ${STALE_LABEL}; it needs the label by hand"
+    fi
   done <<<"${items}"
 }
 
@@ -177,11 +205,13 @@ close() {
 
     printf '  close %s\n' "${url}"
     if [[ "${is_pr}" == "true" ]]; then
-      run gh pr close "${number}" --repo "${repo}" \
-        --comment "$(close_body 'pull request')" --delete-branch
+      retry run gh pr close "${number}" --repo "${repo}" \
+        --comment "$(close_body 'pull request')" --delete-branch \
+        || warn "could not close ${url}; it will be retried on the next run"
     else
-      run gh issue close "${number}" --repo "${repo}" \
-        --comment "$(close_body 'issue')" --reason "not planned"
+      retry run gh issue close "${number}" --repo "${repo}" \
+        --comment "$(close_body 'issue')" --reason "not planned" \
+        || warn "could not close ${url}; it will be retried on the next run"
     fi
   done <<<"${items}"
 }
