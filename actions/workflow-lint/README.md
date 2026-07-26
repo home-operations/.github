@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
 
       - name: Lint workflows
-        uses: home-operations/.github/actions/workflow-lint@<sha> # workflow-lint-0.1.0
+        uses: home-operations/.github/actions/workflow-lint@<sha> # workflow-lint-1.0.0
 ```
 
 Reference it by commit SHA. A branch or tag reference trips zizmor's `unpinned-uses` audit in the calling repository.
