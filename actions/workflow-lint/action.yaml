@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Workflow Lint
+description: Lint workflows and action definitions with actionlint and zizmor
+
+inputs:
+  actionlint-version:
+    description: Version of actionlint to run
+    # renovate: datasource=github-releases depName=rhysd/actionlint
+    default: "1.7.12"
+  zizmor-version:
+    description: Version of zizmor to run
+    # renovate: datasource=github-releases depName=zizmorcore/zizmor
+    default: "1.28.0"
+
+runs:
+  using: composite
+  steps:
+    # install: false — the linters are pinned by this action rather than taken
+    # from the calling repository's tool versions, so every repository is held
+    # to the same ones.
+    - name: Setup Mise
+      uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
+      with:
+        install: false
+
+    - name: Run actionlint
+      shell: bash
+      env:
+        ACTIONLINT_VERSION: ${{ inputs.actionlint-version }}
+      run: |
+        # actionlint runs shellcheck with --norc, so the repository's
+        # .shellcheckrc is skipped; SHELLCHECK_OPTS is read by shellcheck itself.
+        if [[ -f .shellcheckrc ]]; then
+          disabled=$(sed -n 's/^disable=//p' .shellcheckrc | paste -sd,)
+          if [[ -n "${disabled}" ]]; then
+            export SHELLCHECK_OPTS="--exclude=${disabled}"
+          fi
+        fi
+        # actionlint has no schema for parallel steps yet (rhysd/actionlint#694);
+        # drop the ignores once a release carries it.
+        mise exec actionlint@"${ACTIONLINT_VERSION}" -- actionlint -color \
+          -ignore 'unexpected key "(background|cancel|parallel|wait|wait-all)" for step' \
+          -ignore 'step must run script with "run" section or run action with "uses" section'
+
+    - name: Run zizmor
+      if: ${{ !cancelled() }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        ZIZMOR_VERSION: ${{ inputs.zizmor-version }}
+      run: |
+        mise exec zizmor@"${ZIZMOR_VERSION}" -- zizmor --color=always --no-progress .
