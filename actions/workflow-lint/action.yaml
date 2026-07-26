@@ -16,9 +16,6 @@ inputs:
 runs:
   using: composite
   steps:
-    # install: false — the linters are pinned by this action rather than taken
-    # from the calling repository's tool versions, so every repository is held
-    # to the same ones.
     - name: Setup Mise
       uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
       with:
@@ -29,16 +26,12 @@ runs:
       env:
         ACTIONLINT_VERSION: ${{ inputs.actionlint-version }}
       run: |
-        # actionlint runs shellcheck with --norc, so the repository's
-        # .shellcheckrc is skipped; SHELLCHECK_OPTS is read by shellcheck itself.
         if [[ -f .shellcheckrc ]]; then
           disabled=$(sed -n 's/^disable=//p' .shellcheckrc | paste -sd,)
           if [[ -n "${disabled}" ]]; then
             export SHELLCHECK_OPTS="--exclude=${disabled}"
           fi
         fi
-        # actionlint has no schema for parallel steps yet (rhysd/actionlint#694);
-        # drop the ignores once a release carries it.
         mise exec actionlint@"${ACTIONLINT_VERSION}" -- actionlint -color \
           -ignore 'unexpected key "(background|cancel|parallel|wait|wait-all)" for step' \
           -ignore 'step must run script with "run" section or run action with "uses" section'
