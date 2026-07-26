@@ -3,6 +3,15 @@
   "release-type": "simple",
   "separate-pull-requests": true,
   "packages": {
+    "actions/docs-build": {
+      "component": "docs-build",
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "include-v-in-tag": false,
+      "include-v-in-release-name": false,
+      "always-update": true
+    },
     "actions/workflow-lint": {
       "component": "workflow-lint",
       "changelog-path": "CHANGELOG.md",

@@ -1,3 +1,4 @@
 {
+  "actions/docs-build": "0.0.0",
   "actions/workflow-lint": "1.0.0"
 }
