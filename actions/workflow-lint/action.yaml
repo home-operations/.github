@@ -26,13 +26,7 @@ runs:
       env:
         ACTIONLINT_VERSION: ${{ inputs.actionlint-version }}
       run: |
-        if [[ -f .shellcheckrc ]]; then
-          disabled=$(sed -n 's/^disable=//p' .shellcheckrc | paste -sd,)
-          if [[ -n "${disabled}" ]]; then
-            export SHELLCHECK_OPTS="--exclude=${disabled}"
-          fi
-        fi
-        mise exec actionlint@"${ACTIONLINT_VERSION}" -- actionlint -color \
+        mise exec actionlint@"${ACTIONLINT_VERSION}" -- actionlint -color -shellcheck= \
           -ignore 'unexpected key "(background|cancel|parallel|wait|wait-all)" for step' \
           -ignore 'step must run script with "run" section or run action with "uses" section'
 
