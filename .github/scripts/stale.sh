@@ -16,6 +16,21 @@ DAYS_BEFORE_CLOSE="${DAYS_BEFORE_CLOSE:-7}"
 STALE_LABEL="${STALE_LABEL:-stale}"
 DRY_RUN="${DRY_RUN:-false}"
 
+# Comma-separated labels that exempt an item from being marked or closed. Empty
+# matches the actions/stale configuration this replaces, which set no exempt-*
+# inputs. Exemptions deliberately do not apply to the revive pass: an item that
+# becomes exempt after being marked should still shed its label.
+EXEMPT_LABELS="${EXEMPT_LABELS:-}"
+
+# Bounds the blast radius of a malformed query, mirroring the intent of
+# actions/stale's operations-per-run. Anything over budget is left for the next
+# run. Sized for org-wide scope: the 23 workflows this replaces each carried
+# their own budget of 30.
+OPERATIONS_PER_RUN="${OPERATIONS_PER_RUN:-100}"
+
+# The search API will not return more than this no matter what is asked for.
+readonly SEARCH_LIMIT=1000
+
 # Applying the label bumps updated_at, so a freshly marked item reports
 # updated_at at the same instant as its labeled event. Only treat an item as
 # revived once the gap exceeds the skew between those two writes.
@@ -24,7 +39,14 @@ readonly UNSTALE_GRACE_SECONDS=120
 stale_before="$(date -u -d "${DAYS_BEFORE_STALE} days ago" +%F)"
 close_before="$(date -u -d "${DAYS_BEFORE_CLOSE} days ago" +%F)"
 
+operations=0
+
+warn() {
+  printf '::warning::%s\n' "$*"
+}
+
 run() {
+  operations=$((operations + 1))
   if [[ "${DRY_RUN}" == "true" ]]; then
     printf '    would run: %s\n' "$*"
     return 0
@@ -32,16 +54,49 @@ run() {
   "$@"
 }
 
-# Raw qualifiers go after `--` so the leading `-` of a negated one is not read
-# as a flag.
+over_budget() {
+  if ((operations >= OPERATIONS_PER_RUN)); then
+    warn "operations budget of ${OPERATIONS_PER_RUN} reached; remaining items deferred to the next run"
+    return 0
+  fi
+  return 1
+}
+
+# Labels that exempt an item, as search qualifiers.
+exempt_args=()
+if [[ -n "${EXEMPT_LABELS}" ]]; then
+  IFS=',' read -ra exempt_labels <<<"${EXEMPT_LABELS}"
+  for label in "${exempt_labels[@]}"; do
+    label="${label#"${label%%[![:space:]]*}"}"
+    label="${label%"${label##*[![:space:]]}"}"
+    if [[ -n "${label}" ]]; then
+      exempt_args+=("-label:${label}")
+    fi
+  done
+fi
+
+# is:unlocked because commenting on a locked item fails; those are skipped
+# rather than allowed to abort the run.
 search() {
   gh search issues \
     --owner "${ORG}" \
     --state open \
     --include-prs \
-    --limit 100 \
+    --limit "${SEARCH_LIMIT}" \
     --json repository,number,isPullRequest,updatedAt,url \
-    "$@"
+    "$@" "is:unlocked"
+}
+
+# Warns rather than truncating silently when a pass saturates the search cap.
+rows() {
+  local json
+  json="$(search "$@")"
+
+  if (($(jq -r 'length' <<<"${json}") >= SEARCH_LIMIT)); then
+    warn "search returned the ${SEARCH_LIMIT}-result cap; some items were not seen this run"
+  fi
+
+  jq -r '.[] | [.repository.nameWithOwner, .number, .isPullRequest, .updatedAt, .url] | @tsv' <<<"${json}"
 }
 
 noun_for() {
@@ -65,22 +120,25 @@ close_body() {
 unstale() {
   printf '==> Reviving items active since they were marked\n'
 
-  search -- "label:${STALE_LABEL}" \
-    | jq -r '.[] | [.repository.nameWithOwner, .number, .updatedAt, .url] | @tsv' \
-    | while IFS=$'\t' read -r repo number updated_at url; do
-      local labeled_at
-      labeled_at="$(gh api "repos/${repo}/issues/${number}/timeline" --paginate \
-        --jq ".[] | select(.event == \"labeled\" and .label.name == \"${STALE_LABEL}\") | .created_at" \
-        | tail -1)"
+  local items repo number is_pr updated_at url labeled_at
+  items="$(rows -- "label:${STALE_LABEL}")"
+  [[ -n "${items}" ]] || return 0
 
-      # Labelled by hand rather than by this script; leave it alone.
-      [[ -n "${labeled_at}" ]] || continue
+  while IFS=$'\t' read -r repo number is_pr updated_at url; do
+    over_budget && break
 
-      if (($(date -u -d "${updated_at}" +%s) - $(date -u -d "${labeled_at}" +%s) > UNSTALE_GRACE_SECONDS)); then
-        printf '  revive %s\n' "${url}"
-        run gh api -X DELETE "repos/${repo}/issues/${number}/labels/${STALE_LABEL}" --silent
-      fi
-    done
+    labeled_at="$(gh api "repos/${repo}/issues/${number}/timeline" --paginate \
+      --jq ".[] | select(.event == \"labeled\" and .label.name == \"${STALE_LABEL}\") | .created_at" \
+      | tail -1)"
+
+    # Labelled by hand rather than by this script; leave it alone.
+    [[ -n "${labeled_at}" ]] || continue
+
+    if (($(date -u -d "${updated_at}" +%s) - $(date -u -d "${labeled_at}" +%s) > UNSTALE_GRACE_SECONDS)); then
+      printf '  revive %s\n' "${url}"
+      run gh api -X DELETE "repos/${repo}/issues/${number}/labels/${STALE_LABEL}" --silent
+    fi
+  done <<<"${items}"
 }
 
 # Comment first, then label: the label has to be the last write so that
@@ -88,34 +146,44 @@ unstale() {
 mark() {
   printf '==> Marking items untouched since %s\n' "${stale_before}"
 
-  search --updated "<${stale_before}" -- "-label:${STALE_LABEL}" \
-    | jq -r '.[] | [.repository.nameWithOwner, .number, .isPullRequest, .url] | @tsv' \
-    | while IFS=$'\t' read -r repo number is_pr url; do
-      printf '  mark %s\n' "${url}"
-      run gh api "repos/${repo}/issues/${number}/comments" \
-        -f "body=$(stale_body "$(noun_for "${is_pr}")")" --silent
-      run gh api "repos/${repo}/issues/${number}/labels" \
-        -f "labels[]=${STALE_LABEL}" --silent
-    done
+  local items repo number is_pr updated_at url
+  items="$(rows --updated "<${stale_before}" -- "-label:${STALE_LABEL}" "${exempt_args[@]}")"
+  [[ -n "${items}" ]] || return 0
+
+  while IFS=$'\t' read -r repo number is_pr updated_at url; do
+    over_budget && break
+
+    printf '  mark %s\n' "${url}"
+    run gh api "repos/${repo}/issues/${number}/comments" \
+      -f "body=$(stale_body "$(noun_for "${is_pr}")")" --silent
+    run gh api "repos/${repo}/issues/${number}/labels" \
+      -f "labels[]=${STALE_LABEL}" --silent
+  done <<<"${items}"
 }
 
 # Marking set updated_at, so "labelled and untouched since close_before" is the
-# same thing as "stale for DAYS_BEFORE_CLOSE days".
+# same thing as "stale for DAYS_BEFORE_CLOSE days". actions/stale counts from
+# the label's creation date instead; the two agree only because the revive pass
+# strips the label from anything touched in between.
 close() {
   printf '==> Closing items marked before %s\n' "${close_before}"
 
-  search --updated "<${close_before}" -- "label:${STALE_LABEL}" \
-    | jq -r '.[] | [.repository.nameWithOwner, .number, .isPullRequest, .url] | @tsv' \
-    | while IFS=$'\t' read -r repo number is_pr url; do
-      printf '  close %s\n' "${url}"
-      if [[ "${is_pr}" == "true" ]]; then
-        run gh pr close "${number}" --repo "${repo}" \
-          --comment "$(close_body 'pull request')" --delete-branch
-      else
-        run gh issue close "${number}" --repo "${repo}" \
-          --comment "$(close_body 'issue')" --reason "not planned"
-      fi
-    done
+  local items repo number is_pr updated_at url
+  items="$(rows --updated "<${close_before}" -- "label:${STALE_LABEL}" "${exempt_args[@]}")"
+  [[ -n "${items}" ]] || return 0
+
+  while IFS=$'\t' read -r repo number is_pr updated_at url; do
+    over_budget && break
+
+    printf '  close %s\n' "${url}"
+    if [[ "${is_pr}" == "true" ]]; then
+      run gh pr close "${number}" --repo "${repo}" \
+        --comment "$(close_body 'pull request')" --delete-branch
+    else
+      run gh issue close "${number}" --repo "${repo}" \
+        --comment "$(close_body 'issue')" --reason "not planned"
+    fi
+  done <<<"${items}"
 }
 
 if [[ "${DRY_RUN}" == "true" ]]; then
@@ -125,3 +193,5 @@ fi
 unstale
 mark
 close
+
+printf '==> %s operation(s) of %s budget\n' "${operations}" "${OPERATIONS_PER_RUN}"

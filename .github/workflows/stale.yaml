@@ -51,4 +51,11 @@ jobs:
           GH_TOKEN: "${{ steps.app-token.outputs.token }}"
           ORG: "${{ github.repository_owner }}"
           DRY_RUN: "${{ inputs.dryRun || false }}"
+          DAYS_BEFORE_STALE: 60
+          DAYS_BEFORE_CLOSE: 7
+          STALE_LABEL: stale
+          # Empty matches the actions/stale configuration this replaces, which
+          # set no exempt-* inputs.
+          EXEMPT_LABELS: ""
+          OPERATIONS_PER_RUN: 100
         run: .github/scripts/stale.sh
