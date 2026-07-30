@@ -4,3 +4,4 @@ rules:
     ignore:
       - renovate.yaml
       - safe-settings.yaml
+      - stale.yaml

@@ -6,43 +6,56 @@ on:
   schedule:
     - cron: 30 1 * * *
   workflow_dispatch:
+    inputs:
+      dryRun:
+        description: Dry Run
+        default: false
+        required: false
+        type: boolean
 
 permissions:
   contents: read
+
+concurrency:
+  group: stale
+  cancel-in-progress: false
 
 jobs:
   stale:
     name: Stale
     runs-on: ubuntu-24.04
     permissions:
-      actions: write
-      contents: write
-      issues: write
-      pull-requests: write
+      contents: read
     steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # No `repositories:` input on purpose: the token is scoped to every
+      # repository the app is installed on, which is what makes a single run
+      # cover the org. contents:write is for --delete-branch on closed PRs.
       - name: Generate Token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         with:
           client-id: "${{ secrets.BOT_CLIENT_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+          owner: "${{ github.repository_owner }}"
+          permission-contents: write
           permission-issues: write
           permission-pull-requests: write
 
-      - name: Stale
-        uses: actions/stale@1e223db275d687790206a7acac4d1a11bd6fe629 # v10.4.0
-        with:
-          repo-token: ${{ steps.app-token.outputs.token }}
-          stale-issue-message: |
-            This issue has been marked as stale due to 60 days of inactivity. Please remove the stale label or leave a comment to keep it open.
-            If no action is taken, it will be automatically closed in 7 days.
-          stale-pr-message: |
-            This pull request has been marked as stale due to 60 days of inactivity. Please remove the stale label or leave a comment to keep it open.
-            If no action is taken, it will be automatically closed in 7 days.
-          close-issue-message: |
-            This issue has been automatically closed after 7 days of inactivity following the stale status.
-          close-pr-message: |
-            This pull request has been automatically closed after 7 days of inactivity following the stale status.
-          stale-issue-label: stale
-          stale-pr-label: stale
-          delete-branch: true
+      - name: Process stale issues and pull requests
+        env:
+          GH_TOKEN: "${{ steps.app-token.outputs.token }}"
+          ORG: "${{ github.repository_owner }}"
+          DRY_RUN: "${{ inputs.dryRun || false }}"
+          DAYS_BEFORE_STALE: 60
+          DAYS_BEFORE_CLOSE: 7
+          STALE_LABEL: stale
+          # Empty matches the actions/stale configuration this replaces, which
+          # set no exempt-* inputs.
+          EXEMPT_LABELS: ""
+          OPERATIONS_PER_RUN: 100
+        run: .github/scripts/stale.sh
