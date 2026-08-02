@@ -26,7 +26,9 @@ runs:
       run: |
         mise exec actionlint@"${ACTIONLINT_VERSION}" -- actionlint -color -shellcheck= \
           -ignore 'unexpected key "(background|cancel|parallel|wait|wait-all)" for step' \
-          -ignore 'step must run script with "run" section or run action with "uses" section'
+          -ignore 'step must run script with "run" section or run action with "uses" section' \
+          -ignore 'specifying action "\$/.+" in invalid format because ref is missing' \
+          -ignore 'reusable workflow call "\$/.+" at "uses" is not following the format'
 
     - name: Run zizmor
       if: ${{ !cancelled() }}
