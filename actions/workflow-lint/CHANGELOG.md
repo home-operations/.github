@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.2...workflow-lint-v1.0.3) (2026-08-02)
+
+
+### Bug Fixes
+
+* **workflow-lint:** cover bare $/ references in the actionlint ignores ([#79](https://github.com/home-operations/.github/issues/79)) ([3a079b6](https://github.com/home-operations/.github/commit/3a079b632d50990d8268b6ea4c0ed26a72f73285))
+
 ## [1.0.2](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.1...workflow-lint-v1.0.2) (2026-08-02)
 
 
