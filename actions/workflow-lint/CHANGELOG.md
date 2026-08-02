@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.1...workflow-lint-v1.0.2) (2026-08-02)
+
+
+### Continuous Integration
+
+* **workflow-lint:** ignore actionlint errors for $/ self-repository uses: syntax ([#74](https://github.com/home-operations/.github/issues/74)) ([801344f](https://github.com/home-operations/.github/commit/801344f1626dd93e9f4ab285dab108de8f6a7866))
+
 ## [1.0.1](https://github.com/home-operations/.github/compare/workflow-lint-1.0.0...workflow-lint-v1.0.1) (2026-08-01)
 
 
