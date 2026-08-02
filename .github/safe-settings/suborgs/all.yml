@@ -17,6 +17,12 @@
 
 suborgrepos:
   - "*"
+  # safe-settings matches these entries with minimatch (lib/glob.js) using
+  # default options, and a default-options `*` never matches a dot-leading
+  # name. Without this entry the admin repo gets only ../repos/.github.yml,
+  # which is an additions-only fragment — the sync then tries to create a
+  # ruleset with no `enforcement` and every full-sync run 422s.
+  - ".github"
 
 rulesets:
   - name: main
