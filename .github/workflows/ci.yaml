@@ -34,7 +34,7 @@ jobs:
           persist-credentials: false
 
       - name: Lint workflows
-        uses: ./actions/workflow-lint
+        uses: $/actions/workflow-lint
 
   status:
     if: ${{ !cancelled() }}
