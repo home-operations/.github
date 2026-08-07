@@ -1,0 +1,79 @@
+---
+# Org-wide defaults applied to every repo by .github/workflows/reconcile.yaml.
+# Per-repo overrides live in reconcile/config/repos/<repo-name>.yml and are
+# deep-merged over these defaults (repo keys win; label includes append;
+# label excludes union).
+
+# Repos the reconciler never touches (archived repos are always skipped).
+excludeRepos:
+  - .github
+  - admin
+  - safe-settings
+
+# Repository settings, camelCase keys mapped to their snake_case field on the
+# Update Repository API (https://docs.github.com/rest/repos/repos#update-a-repository).
+# Only keys listed here are managed; everything else is left alone. `name`,
+# `private`, and `visibility` are refused by the reconciler as too dangerous
+# to automate.
+settings:
+  hasDiscussions: false
+  hasWiki: false
+  # Squash-only merges with automatic branch cleanup
+  allowSquashMerge: true
+  allowMergeCommit: false
+  allowRebaseMerge: false
+  deleteBranchOnMerge: true
+  allowAutoMerge: true
+  allowUpdateBranch: true
+  # Squash commits use the PR title with no body
+  squashMergeCommitTitle: PR_TITLE
+  squashMergeCommitMessage: BLANK
+
+labels:
+  exclude:
+    # Dynamic managed
+    - ^app/
+    # Labeler managed
+    - ^area/
+    # Release Please managed
+    - "^autorelease: pending$"
+    - "^autorelease: tagged$"
+    - ^release-please:force-run$
+
+  include:
+    # Issue classification
+    - name: bug
+      color: d73a4a
+      description: Something isn't working
+    - name: documentation
+      color: 0075ca
+      description: Improvements or additions to documentation
+    - name: enhancement
+      color: a2eeef
+      description: New feature or request
+    - name: question
+      color: d876e3
+      description: Further information is requested
+    - name: wontfix
+      color: ffffff
+      description: This will not be worked on
+    - name: do-not-merge
+      color: ee0701
+      description: Marks PR that is not (yet) in a mergeable state
+    - name: stale
+      color: c5def5
+      description: Marked stale by automation due to inactivity
+
+    # Semantic version types
+    - name: type/digest
+      color: ffec19
+      description: Issue relates to a digest version bump
+    - name: type/patch
+      color: ffec19
+      description: Issue relates to a patch version bump
+    - name: type/minor
+      color: ff9800
+      description: Issue relates to a minor version bump
+    - name: type/major
+      color: f6412d
+      description: Issue relates to a major version bump

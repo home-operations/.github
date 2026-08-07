@@ -1,0 +1,15 @@
+---
+# Managed-file sync manifest. Sources live under reconcile/files/ mirroring
+# their destination path in each target repo. Drift opens (or updates) a single
+# PR per repo on `branch`; a repo back in sync gets its stale PR closed.
+# Entries support:
+#   path:   destination path (source is reconcile/files/<path>)
+#   repos:  explicit target list (omit = every active repo not in excludeRepos)
+#   exclude: repos to skip for this entry
+#   state: absent   -> the PR removes the file instead
+
+branch: chore/file-sync
+commitMessage: "chore(sync): reconcile managed org files"
+
+files:
+  - path: .github/workflows/renovate.yaml

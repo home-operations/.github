@@ -1,0 +1,15 @@
+{
+  "name": "reconcile",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "reconcile": "node reconcile.mjs"
+  },
+  "dependencies": {
+    "octokit": "^5.0.0",
+    "zx": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

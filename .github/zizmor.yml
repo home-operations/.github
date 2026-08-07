@@ -3,4 +3,5 @@ rules:
   github-app:
     ignore:
       - renovate.yaml
+      - reconcile.yaml
       - safe-settings.yaml
