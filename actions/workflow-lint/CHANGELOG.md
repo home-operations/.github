@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.3...workflow-lint-v1.0.4) (2026-08-07)
+
+
+### Continuous Integration
+
+* **github-action:** Update action jdx/mise-action (v4.2.3 → v4.2.4) ([#83](https://github.com/home-operations/.github/issues/83)) ([ae4de45](https://github.com/home-operations/.github/commit/ae4de4543a7a52e8562b5c7e111acb0d9b438a82))
+
 ## [1.0.3](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.2...workflow-lint-v1.0.3) (2026-08-02)
 
 
