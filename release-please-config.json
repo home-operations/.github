@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "simple",
   "separate-pull-requests": true,
+  "always-update": true,
   "pull-request-title-pattern": "chore(release):${component} ${version}",
   "packages": {
     "actions/docs-build": {
@@ -10,8 +11,7 @@
       "release-type": "simple",
       "include-component-in-tag": true,
       "include-v-in-tag": true,
-      "include-v-in-release-name": true,
-      "always-update": true
+      "include-v-in-release-name": true
     },
     "actions/workflow-lint": {
       "component": "workflow-lint",
@@ -19,8 +19,7 @@
       "release-type": "simple",
       "include-component-in-tag": true,
       "include-v-in-tag": true,
-      "include-v-in-release-name": true,
-      "always-update": true
+      "include-v-in-release-name": true
     }
   },
   "changelog-sections": [
