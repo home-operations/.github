@@ -28,7 +28,8 @@ runs:
           -ignore 'unexpected key "(background|cancel|parallel|wait|wait-all)" for step' \
           -ignore 'step must run script with "run" section or run action with "uses" section' \
           -ignore 'specifying action "\$/.*" in invalid format because ref is missing' \
-          -ignore 'reusable workflow call "\$/.*" at "uses" is not following the format'
+          -ignore 'reusable workflow call "\$/.*" at "uses" is not following the format' \
+          -ignore 'label "ubuntu-26\.04(-arm)?" is unknown'
 
     - name: Run zizmor
       if: ${{ !cancelled() }}
