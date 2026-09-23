@@ -18,6 +18,9 @@ inputs:
     # evicts merge queue entries, so findings are posted as a plain comment.
     description: Submit a blocking REQUEST_CHANGES review on high severity findings
     default: "false"
+  reasoning-effort:
+    description: Reasoning effort for models that accept it (low, medium, high, xhigh or max); empty sends none
+    default: ""
 
 runs:
   using: composite
@@ -30,3 +33,4 @@ runs:
         llm-base-url: ${{ inputs.llm-base-url }}
         model: ${{ inputs.llm-model }}
         request-changes: ${{ inputs.request-changes }}
+        reasoning-effort: ${{ inputs.reasoning-effort }}
