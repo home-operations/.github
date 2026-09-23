@@ -30,10 +30,10 @@ jobs:
   review:
     if: >-
       ${{ (github.event_name == 'pull_request'
-      && github.event.pull_request.head.repo.full_name == github.repository
+      && !github.event.pull_request.head.repo.fork
       && !github.event.pull_request.draft
       && (github.event.action != 'synchronize' || github.event.pull_request.user.type != 'Bot'))
-      || (github.event_name == 'issue_comment' && github.event.issue.pull_request
+      || (github.event_name == 'issue_comment'
       && startsWith(github.event.comment.body, '/robin')
       && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) }}
     name: AI Review
@@ -74,9 +74,10 @@ the calling repository.
   requests whenever the default branch moves and each rebase is a `synchronize` event on
   an unchanged diff. Comment `/robin` to ask for another pass at any time; Robin only
   honours the command from users with write access or higher.
-- The `if:` guard in the example reviews every non-draft pull request whose head branch
-  lives in the repository, bots included, and drops comment triggers from non-members
-  before a runner is spent on them.
+- The `if:` guard in the example reviews every non-draft pull request that does not come
+  from a fork, bots included, and drops comment triggers from non-members before a runner
+  is spent on them. Everything else (comments on issues, unknown commands, bot comments,
+  commenters without write access) Robin rejects on its own.
 - `request-changes` defaults to `false` so findings never block the pull request. A
   REQUEST_CHANGES review from `github-actions[bot]` would hold auto-merge and evict merge
   queue entries.
