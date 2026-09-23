@@ -5,6 +5,14 @@
   "always-update": true,
   "pull-request-title-pattern": "chore(release):${component} ${version}",
   "packages": {
+    "actions/ai-review": {
+      "component": "ai-review",
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "include-v-in-tag": true,
+      "include-v-in-release-name": true
+    },
     "actions/docs-build": {
       "component": "docs-build",
       "changelog-path": "CHANGELOG.md",

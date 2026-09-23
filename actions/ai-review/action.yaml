@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: AI Review
+description: Review a pull request with Robin through an OpenAI-compatible LLM endpoint
+
+inputs:
+  llm-api-key:
+    description: API key for the LLM endpoint
+    required: true
+  llm-base-url:
+    description: Base URL of the OpenAI-compatible LLM endpoint
+    default: https://openrouter.ai/api/v1
+  llm-model:
+    description: Model the endpoint should review with
+    default: anthropic/claude-sonnet-5
+  request-changes:
+    # A REQUEST_CHANGES review from github-actions[bot] blocks auto-merge and
+    # evicts merge queue entries, so findings are posted as a plain comment.
+    description: Submit a blocking REQUEST_CHANGES review on high severity findings
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Run Robin
+      uses: antongulin/robin@69952f90f50251a87cacd4e4d6dc316650418ffd # v2.8.0
+      with:
+        github-token: ${{ github.token }}
+        llm-api-key: ${{ inputs.llm-api-key }}
+        llm-base-url: ${{ inputs.llm-base-url }}
+        model: ${{ inputs.llm-model }}
+        request-changes: ${{ inputs.request-changes }}
