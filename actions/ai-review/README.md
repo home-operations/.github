@@ -15,7 +15,7 @@ name: AI Review
 
 on:
   pull_request:
-    types: [opened, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review]
   issue_comment:
     types: [created]
 
@@ -31,7 +31,8 @@ jobs:
     if: >-
       ${{ (github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
-      && !github.event.pull_request.draft)
+      && !github.event.pull_request.draft
+      && (github.event.action != 'synchronize' || github.event.pull_request.user.type != 'Bot'))
       || (github.event_name == 'issue_comment' && github.event.issue.pull_request
       && startsWith(github.event.comment.body, '/robin')
       && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) }}
@@ -47,6 +48,7 @@ jobs:
         uses: home-operations/.github/actions/ai-review@<sha> # ai-review-v1.0.0
         with:
           llm-api-key: ${{ secrets.LLM_API_KEY }}
+          review-on-synchronize: true
 ```
 
 Reference it by commit SHA. A branch or tag reference trips zizmor's `unpinned-uses` audit in
@@ -54,19 +56,24 @@ the calling repository.
 
 ## Inputs
 
-| Input              | Default                        | Description                                                                   |
-| ------------------ | ------------------------------ | ----------------------------------------------------------------------------- |
-| `llm-api-key`      |                                | API key for the LLM endpoint (required)                                       |
-| `llm-base-url`     | `https://openrouter.ai/api/v1` | Base URL of the OpenAI-compatible LLM endpoint                                |
-| `llm-model`        | `anthropic/claude-sonnet-5`    | Model the endpoint should review with                                         |
-| `request-changes`  | `false`                        | Submit a blocking REQUEST_CHANGES review on high severity findings            |
-| `reasoning-effort` |                                | Reasoning effort for models that accept it (`low` to `max`); empty sends none |
+| Input                   | Default                        | Description                                                                   |
+| ----------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `llm-api-key`           |                                | API key for the LLM endpoint (required)                                       |
+| `llm-base-url`          | `https://openrouter.ai/api/v1` | Base URL of the OpenAI-compatible LLM endpoint                                |
+| `llm-model`             | `anthropic/claude-sonnet-5`    | Model the endpoint should review with                                         |
+| `request-changes`       | `false`                        | Submit a blocking REQUEST_CHANGES review on high severity findings            |
+| `reasoning-effort`      |                                | Reasoning effort for models that accept it (`low` to `max`); empty sends none |
+| `review-on-synchronize` | `false`                        | Review again after each push; the caller must also subscribe to `synchronize` |
 
 ## Behaviour
 
-- A pull request is reviewed once when it is opened, reopened or marked ready for review.
-  Later pushes are not re-reviewed; comment `/robin` on the pull request to ask for another
-  pass. Robin only honours the command from users with write access or higher.
+- A pull request is reviewed when it is opened, reopened or marked ready for review. With
+  `review-on-synchronize: true` and `synchronize` in the caller's event types, every push
+  is reviewed again too; a review still running when the next push lands is cancelled. The
+  example limits re-reviews to human pull requests, since Renovate rebases its open pull
+  requests whenever the default branch moves and each rebase is a `synchronize` event on
+  an unchanged diff. Comment `/robin` to ask for another pass at any time; Robin only
+  honours the command from users with write access or higher.
 - The `if:` guard in the example reviews every non-draft pull request whose head branch
   lives in the repository, bots included, and drops comment triggers from non-members
   before a runner is spent on them.

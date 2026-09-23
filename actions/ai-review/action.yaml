@@ -21,6 +21,9 @@ inputs:
   reasoning-effort:
     description: Reasoning effort for models that accept it (low, medium, high, xhigh or max); empty sends none
     default: ""
+  review-on-synchronize:
+    description: Review again after each push to the pull request; the caller must also subscribe to the synchronize event
+    default: "false"
 
 runs:
   using: composite
@@ -34,3 +37,4 @@ runs:
         model: ${{ inputs.llm-model }}
         request-changes: ${{ inputs.request-changes }}
         reasoning-effort: ${{ inputs.reasoning-effort }}
+        review-on-synchronize: ${{ inputs.review-on-synchronize }}
