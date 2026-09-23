@@ -12,7 +12,7 @@ inputs:
     default: https://openrouter.ai/api/v1
   llm-model:
     description: Model the endpoint should review with
-    default: anthropic/claude-sonnet-5
+    default: openai/gpt-6-sol
   request-changes:
     # A REQUEST_CHANGES review from github-actions[bot] blocks auto-merge and
     # evicts merge queue entries, so findings are posted as a plain comment.

@@ -60,7 +60,7 @@ the calling repository.
 | ----------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
 | `llm-api-key`           |                                | API key for the LLM endpoint (required)                                       |
 | `llm-base-url`          | `https://openrouter.ai/api/v1` | Base URL of the OpenAI-compatible LLM endpoint                                |
-| `llm-model`             | `anthropic/claude-sonnet-5`    | Model the endpoint should review with                                         |
+| `llm-model`             | `openai/gpt-6-sol`             | Model the endpoint should review with                                         |
 | `request-changes`       | `false`                        | Submit a blocking REQUEST_CHANGES review on high severity findings            |
 | `reasoning-effort`      |                                | Reasoning effort for models that accept it (`low` to `max`); empty sends none |
 | `review-on-synchronize` | `false`                        | Review again after each push; the caller must also subscribe to `synchronize` |
