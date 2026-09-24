@@ -1,0 +1,54 @@
+---
+# Adds to the baseline `main` ruleset in ../suborgs/all.yml. Rulesets match by
+# `name` and rules are concatenated, so this may only add rule types the
+# baseline does not already define.
+
+rulesets:
+  - name: main
+    rules:
+      # Require CI before merge. The rule cannot be empty — GitHub rejects it
+      # with no checks listed — which is why a single fan-in check exists at all.
+      #
+      # `strict` (require the branch to be up to date) is deliberately false: the
+      # merge queue below already tests each entry against main plus everything
+      # ahead of it, so the branch itself never needs to be current. Setting both
+      # would only re-add the rebase churn the queue exists to remove, and would
+      # make Renovate rebase branches that the queue is about to supersede.
+      #
+      # `Build Success` is that fan-in, in .github/workflows/ci.yaml. It runs
+      # `if: ${{ !cancelled() }}` so it reports whether the jobs it needs pass or
+      # skip; requiring those jobs directly would hang forever on a pull request
+      # that skips them, such as a release-please version bump.
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: false
+          # Enforce on branch creation too, not just on update.
+          do_not_enforce_on_create: false
+          # integration_id 15368 pins the check to GitHub Actions, so another app
+          # cannot satisfy it by reporting a check of the same name.
+          required_status_checks:
+            - context: Build Success
+              integration_id: 15368
+
+      # Merge through a queue rather than directly, so each pull request is
+      # tested against the result of the ones ahead of it instead of racing them.
+      # Without a queue, `strict` makes concurrent merges serial: the first to
+      # land leaves every other open pull request behind main, and each has to be
+      # rebased and re-tested one at a time.
+      #
+      # The queue builds a temporary ref per entry containing main plus every
+      # entry ahead of it, which is why CI triggers on `merge_group`. A pull
+      # request branch is never rebased for this.
+      - type: merge_queue
+        parameters:
+          # Give up on an entry whose checks never report back.
+          check_response_timeout_minutes: 60
+          # Only merge a group if every entry in it is green.
+          grouping_strategy: ALLGREEN
+          max_entries_to_build: 5
+          max_entries_to_merge: 5
+          merge_method: SQUASH
+          # Merge as soon as one entry is ready, after a short wait to let others
+          # join the same group.
+          min_entries_to_merge: 1
+          min_entries_to_merge_wait_minutes: 5
