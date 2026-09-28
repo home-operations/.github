@@ -41,12 +41,19 @@ rulesets:
       # request branch is never rebased for this.
       - type: merge_queue
         parameters:
-          # Give up on an entry whose checks never report back.
-          check_response_timeout_minutes: 60
+          # Give up on an entry whose checks never report back. Set far above
+          # normal run times: GitHub Free caps the org at 20 concurrent jobs
+          # shared by every repo, so a check can wait hours for a runner. A
+          # timeout drops the entry and rebuilds every entry behind it, which
+          # only adds to that backlog.
+          check_response_timeout_minutes: 240
           # Only merge a group if every entry in it is green.
           grouping_strategy: ALLGREEN
-          max_entries_to_build: 5
-          max_entries_to_merge: 5
+          # Each entry being built is a full CI run on that shared pool, so keep
+          # this small. Under ALLGREEN a group cannot merge more entries than
+          # were built, so the merge limit matches.
+          max_entries_to_build: 2
+          max_entries_to_merge: 2
           merge_method: SQUASH
           # Merge as soon as one entry is ready, after a short wait to let others
           # join the same group.
