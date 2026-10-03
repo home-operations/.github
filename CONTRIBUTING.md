@@ -13,15 +13,18 @@ Following these guidelines helps to communicate that you respect the time of the
 ## AI Usage Policy
 
 > [!IMPORTANT]
-> AI-assisted contributions are welcome in [home-operations](https://github.com/home-operations) repositories, as long as they are disclosed. Undisclosed AI use may get a contribution closed, and repeated cases may get your account banned from contributing.
+> AI-assisted contributions are welcome in [home-operations](https://github.com/home-operations) repositories if they follow this policy. Contributions that don't, including undisclosed AI use, will be closed, and repeated cases may get your account banned from contributing.
 
-We recommend that people write their own issues, pull requests and code. If you use AI anyway:
+We recommend that people write their own issues, pull requests and code. If you use AI, these rules are required:
 
-1. **Use a frontier model.** For code contributions and debugging, use a current frontier model. Smaller and older models produce changes that look right and aren't, and reviewing those costs more time than they save.
+1. **Use a frontier model at high effort.** Code written or debugged with AI must come from a current frontier model (the newest, most capable model from a major AI lab) running at high effort or above. Smaller, older and local models, and low or medium effort settings, are not accepted for code: they produce changes that look right and aren't, and reviewing those costs more time than they save. Editor autocomplete of a line or two is exempt.
 2. **Disclose it.** Fill in the AI usage disclosure in the pull request template (or add one to your issue) with:
    - the model, e.g. `Claude Opus 5.5`
-   - the effort or reasoning level it ran at, e.g. `high`
+   - the effort level it ran at, e.g. `high`
    - what it did, e.g. wrote the code, wrote the tests, helped debug, drafted the description
+
+   A disclosure without the model and effort level counts as undisclosed.
+
 3. **Own it.** Review every line before you submit, and be ready to explain any of it when a reviewer asks. You are responsible for the contribution, not the tool.
 
 Example:
