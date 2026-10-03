@@ -42,18 +42,8 @@ run = "oxfmt {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.mise-lock]
-glob = [".mise.toml", ".mise/config.toml"]
-# The -p list pins which platforms locks are generated for. mise infers the
-# set from an existing lockfile (including for newly added tools), so this
-# only decides the bootstrap case where no lockfile exists yet — without it a
-# fresh lock would pick up musl and windows entries nothing installs, and
-# those arches are where upstreams most often miss assets or signatures.
-# npm tools get dependency sidecars next to the lockfile, and `mise install
-# --locked` fails without them. mise.lock pins every sidecar by digest and
-# `mise lock` rewrites the whole directory, so all of it is staged (including
-# removals): a partial stage would commit a mismatched pair. A failed `git add`
-# fails the hook rather than committing the lock without its sidecars.
-run = 'mise lock -p linux-x64,linux-arm64,macos-arm64 && for f in {staged_files}; do d="$(dirname "$f")"; case "$d" in .mise|*/.mise) s="$d/locks" ;; *) s="$d/.mise/locks" ;; esac; if [ -f "$d/mise.lock" ]; then git add "$d/mise.lock" || exit 1; fi; if [ -e "$s" ] || [ -n "$(git ls-files -- "$s")" ]; then git add -A -- "$s" || exit 1; fi; done'
+glob = [".mise/config.toml"]
+run = 'mise lock && git add -A -- .mise ":(exclude).mise/config.toml"'
 
 [pre-commit.commands.actionlint]
 glob = [".github/workflows/*.yaml"]
