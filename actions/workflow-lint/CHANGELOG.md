@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.4...workflow-lint-v1.0.5) (2026-10-03)
+
+
+### Miscellaneous Chores
+
+* **github-action:** update action jdx/mise-action (v4.3.0 → v5.0.0) ([#125](https://github.com/home-operations/.github/issues/125)) ([f55e81d](https://github.com/home-operations/.github/commit/f55e81d8901db000e6da6e789fb8a88ab106404a))
+
 ## [1.0.4](https://github.com/home-operations/.github/compare/workflow-lint-v1.0.3...workflow-lint-v1.0.4) (2026-09-18)
 
 
