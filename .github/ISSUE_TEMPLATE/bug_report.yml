@@ -33,3 +33,10 @@ body:
     attributes:
       label: Version
       placeholder: "v1.2.3"
+
+  - type: input
+    id: ai-disclosure
+    attributes:
+      label: AI usage disclosure
+      description: If AI helped write this issue, name the model, its effort level and what it did. See the [AI Usage Policy](https://github.com/home-operations/.github/blob/main/CONTRIBUTING.md#ai-usage-policy).
+      placeholder: "Claude Opus 5.5 (high effort) helped debug and drafted this issue"
