@@ -43,7 +43,7 @@ labels:
 
     # Renovate control
     - name: stop-updating
-      color: 5319e7
+      color: "5319e7"
       description: Renovate will stop updating this PR
 
     # Semantic version types
