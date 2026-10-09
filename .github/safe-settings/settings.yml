@@ -3,12 +3,8 @@
 # Per-repo overrides live in .github/safe-settings/repos/<repo-name>.yml.
 # Schema: https://github.com/github/safe-settings/blob/main/docs/sample-settings/settings.yml
 #
-# Labels-only by intent. The `repository:` plugin in safe-settings 2.1.x
-# has a race condition: updateRepos() mutates `this.config.repository`
-# in place while eachRepositoryRepos processes repos via Promise.all, so
-# parallel iterations clobber each other's `name`/`org` fields. Until
-# upstream fixes it, manage repo-level settings (default_branch, merge
-# modes, features, …) through org policy or by hand.
+# Labels-only for now: repo-level settings (default_branch, merge modes,
+# features, …) are managed through org policy or by hand.
 
 labels:
   exclude:

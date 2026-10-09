@@ -80,6 +80,15 @@ rulesets:
           require_code_owner_review: false
           require_last_push_approval: false
           required_review_thread_resolution: false
+          # GitHub fills these in with defaults when they are omitted, and
+          # safe-settings treats a parameter that GitHub returns but this file
+          # leaves out as a deletion, so the ruleset would be rewritten on every
+          # sync. Stating the defaults keeps it converged.
+          required_reviewers: []
+          dismissal_restriction:
+            enabled: false
+            allowed_actors: []
+          require_extra_approval_for_unattributed_changes: true
           # Squash only, matching every repo's merge settings.
           allowed_merge_methods:
             - squash

@@ -23,7 +23,7 @@ permissions:
 
 env:
   # renovate: datasource=github-releases depName=github/safe-settings
-  SAFE_SETTINGS_VERSION: 2.1.18
+  SAFE_SETTINGS_VERSION: 3.0.0
   SAFE_SETTINGS_DIR: ${{ github.workspace }}/.safe-settings
 
 jobs:
@@ -31,6 +31,13 @@ jobs:
     name: Reconcile org repository settings
     runs-on: ubuntu-26.04
     steps:
+      # Only for .mise, so Setup Mise installs the pinned Node rather than
+      # falling back to whatever the runner image ships.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Checkout safe-settings
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -49,36 +56,18 @@ jobs:
         working-directory: ${{ env.SAFE_SETTINGS_DIR }}
         run: npm ci
 
-      - name: Generate Token
-        id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ secrets.BOT_CLIENT_ID }}
-          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          permission-metadata: read
-
-      # safe-settings PATCHes every installation repo it sees, including
-      # archived ones (which the API rejects with 403). Generate a deployment
-      # config that lists all currently-archived repos so safe-settings skips
-      # them. Re-runs daily via the schedule pick up newly archived repos.
+      # safe-settings skips archived repos itself. The file has to exist anyway:
+      # without one, safe-settings restricts `admin`, `.github` and
+      # `safe-settings` by default, which would leave this repo unmanaged.
       - name: Generate deployment-settings.yml
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          OWNER: ${{ github.repository_owner }}
         run: |
-          {
-            echo '---'
-            echo 'restrictedRepos:'
-            echo '  exclude:'
-            gh repo list "$OWNER" --limit 200 --json name,isArchived \
-              --jq '.[] | select(.isArchived) | "    - " + .name'
-          } > deployment-settings.yml
-          cat deployment-settings.yml
+          echo 'restrictedRepos: []' > deployment-settings.yml
 
       - name: Run safe-settings full-sync
         working-directory: ${{ env.SAFE_SETTINGS_DIR }}
         env:
+          # Probot defaults to warn, which hides the dry-run summary.
+          LOG_LEVEL: info
           GH_ORG: ${{ github.repository_owner }}
           APP_ID: ${{ secrets.BOT_APP_ID }}
           PRIVATE_KEY: ${{ secrets.BOT_APP_PRIVATE_KEY }}
