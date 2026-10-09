@@ -2,6 +2,11 @@ name: Feature request
 description: Suggest a new feature or improvement
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Please read the [AI Usage Policy](https://github.com/home-operations/.github/blob/main/CONTRIBUTING.md#ai-usage-policy) before submitting.
+
   - type: textarea
     id: problem
     attributes:
@@ -12,8 +17,8 @@ body:
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed solution
-      description: How would you like this to behave? Sketch the API or config if relevant.
+      label: Desired behavior
+      description: How should it work from a user's point of view? Sketch the config or API you'd use if relevant, but not how to implement it.
     validations:
       required: true
 

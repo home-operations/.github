@@ -5,13 +5,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to file a bug. Please read the [AI Usage Policy](https://github.com/home-operations/.github/blob/main/CONTRIBUTING.md#ai-usage-policy) before submitting.
+        Thanks for taking the time to file a bug. Please read the [AI Usage Policy](https://github.com/home-operations/.github/blob/main/CONTRIBUTING.md#ai-usage-policy) before submitting. If AI helped write this issue, describe the problem only: no proposed fixes or code changes.
 
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: A clear description of the bug, what you expected, and what actually happened.
+      description: What you expected to happen, and what actually happened.
     validations:
       required: true
 
@@ -19,6 +19,7 @@ body:
     id: reproduce
     attributes:
       label: Steps to reproduce
+      description: The smallest set of steps that triggers the bug. Say whether it fails every time or only sometimes.
     validations:
       required: true
 
@@ -27,6 +28,18 @@ body:
     attributes:
       label: Relevant logs or output
       render: shell
+
+  - type: textarea
+    id: debugging
+    attributes:
+      label: Debugging done
+      description: What you checked, what you ruled out and how, and where the behavior breaks (a component, code path or commit found by bisecting). Report what you observed, not a fix.
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: If you found a way to avoid the bug without changing this project's code (a config change, pinning an older version, a manual step), describe it. Leave blank if there is none.
 
   - type: input
     id: version

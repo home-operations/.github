@@ -27,6 +27,18 @@ We recommend that people write their own issues, pull requests and code. If you 
 
 3. **Own it.** Review every line before you submit, and be ready to explain any of it when a reviewer asks. You are responsible for the contribution, not the tool.
 
+4. **Report the problem, not the fix.** If AI helped write an issue, the issue describes the problem and stops there. Don't propose a fix, patch or code change. Put that effort into debugging instead:
+   - exact steps to reproduce, and whether it fails every time or only sometimes
+   - expected and actual behavior
+   - versions, configuration and environment
+   - full logs, errors and stack traces
+   - what you ruled out, and how
+   - where the behavior breaks (a component, code path or commit found by bisecting), stated as an observation, not a remedy
+
+   For feature requests, describe the behavior you want, not how to build it.
+
+   Keep what you observed separate from what you inferred, and label anything you haven't verified. A suggested fix pushes whoever picks up the issue, person or model, toward one answer before the problem is understood. A clean, well-debugged report lets them work out the fix from the evidence.
+
 Example:
 
 > AI usage disclosure: YES - Claude Opus 5.5 (high effort) wrote the implementation and tests and drafted this description. I reviewed and tested the change.
