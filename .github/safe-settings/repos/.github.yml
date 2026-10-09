@@ -3,11 +3,11 @@
 # `name` and rules are concatenated, so this may only add rule types the
 # baseline does not already define.
 #
-# This file only takes effect if `.github` is not listed in the
-# `restrictedRepos.exclude` block that ../../workflows/safe-settings.yaml
-# generates into deployment-settings.yml: safe-settings skips a restricted
-# repo before any suborg or repo config is considered, which is why this repo
-# had no ruleset at all (not even the baseline) while every other repo did.
+# This file only takes effect if `.github` is not restricted in the
+# deployment-settings.yml that ../../workflows/safe-settings.yaml generates:
+# safe-settings skips a restricted repo before any suborg or repo config is
+# considered, which is why this repo had no ruleset at all (not even the
+# baseline) while every other repo did.
 
 rulesets:
   - name: main
