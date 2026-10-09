@@ -41,10 +41,13 @@ labels:
       color: c5def5
       description: Marked stale by automation due to inactivity
 
-    # Renovate control
+    # Automation control
     - name: stop-updating
       color: "5319e7"
       description: Renovate will stop updating this PR
+    - name: stop-reviewing
+      color: "d4c5f9"
+      description: AI review will stop reviewing this PR
 
     # Semantic version types
     - name: type/digest
