@@ -48,11 +48,11 @@ rulesets:
     # the API's ordering and does not diff on every sync. Do not give
     # OrganizationAdmin an actor_id: GitHub ignores it and stores null.
     #
-    # No Integration bypass here by design. Renovate and release-please both run
-    # as sticky-gecko and both work through pull requests, so neither needs to
-    # bypass anything; withholding it is what stops a future automerge setting
-    # from quietly pushing to main again. homebrew-tap is the one repo that
-    # genuinely pushes direct and adds the actor back.
+    # No Integration bypass here by design. Renovate (the Mend Renovate app) and
+    # release-please (sticky-gecko) both work through pull requests, so neither
+    # needs to bypass anything; withholding it is what stops a future automerge
+    # setting from quietly pushing to main again. homebrew-tap is the one repo
+    # that genuinely pushes direct and adds the actor back.
     bypass_actors:
       # Org owners, so a broken ruleset can always be fixed by hand.
       - actor_type: OrganizationAdmin
