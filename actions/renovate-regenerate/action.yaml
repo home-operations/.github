@@ -1,0 +1,62 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Renovate Regenerate
+description: Run a mise task on a pull request's head and upload the generated files it changed as a patch
+
+inputs:
+  task:
+    description: mise task that regenerates the files
+    required: true
+  paths:
+    description: Newline-separated git pathspecs of the generated files to keep
+    required: true
+
+outputs:
+  changed:
+    description: Whether the task changed any file matched by `paths`
+    value: ${{ steps.diff.outputs.changed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        persist-credentials: false
+
+    - name: Setup Mise
+      uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      with:
+        experimental: true
+        install_args: --locked
+
+    - name: Run task
+      shell: bash
+      env:
+        TASK: ${{ inputs.task }}
+      run: mise run "${TASK}"
+
+    - name: Collect changes
+      id: diff
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+      run: |
+        printf '%s\n' "${PATHS}" | sed '/^[[:space:]]*$/d' | git add --all --pathspec-from-file=-
+        if git diff --cached --quiet; then
+          echo "changed=false" >> "${GITHUB_OUTPUT}"
+        else
+          git diff --cached --stat
+          git diff --cached --binary > "${RUNNER_TEMP}/renovate-regenerate.patch"
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+        fi
+
+    - name: Upload patch
+      if: ${{ steps.diff.outputs.changed == 'true' }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: renovate-regenerate
+        path: ${{ runner.temp }}/renovate-regenerate.patch
+        retention-days: 1
+        overwrite: true
