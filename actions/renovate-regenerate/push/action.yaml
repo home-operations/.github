@@ -48,7 +48,7 @@ runs:
         PATHS: ${{ inputs.paths }}
       run: |
         git apply "${RUNNER_TEMP}/renovate-regenerate/renovate-regenerate.patch"
-        xargs git add -- <<< "${PATHS}"
+        sed '/^[[:space:]]*$/d' <<< "${PATHS}" | git add --pathspec-from-file=-
         user_id="$(gh api "users/${APP_SLUG}[bot]" --jq .id)"
         git -c user.name="${APP_SLUG}[bot]" -c user.email="${user_id}+${APP_SLUG}[bot]@users.noreply.github.com" \
           commit --message "chore(renovate): regenerate generated files"

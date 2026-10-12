@@ -44,7 +44,7 @@ runs:
         PATHS: ${{ inputs.paths }}
       run: |
         git reset --quiet
-        xargs git add -- <<< "${PATHS}"
+        sed '/^[[:space:]]*$/d' <<< "${PATHS}" | git add --pathspec-from-file=-
         if git diff --cached --quiet; then
           echo "changed=false" >> "${GITHUB_OUTPUT}"
         else
