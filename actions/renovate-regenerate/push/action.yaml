@@ -11,7 +11,7 @@ inputs:
     description: Private key of the GitHub App that commits
     required: true
   paths:
-    description: Newline-separated git pathspecs the patch may change; a patch touching anything else is rejected
+    description: Newline-separated git pathspecs to commit from the patch; anything else in it is left out
     required: true
 
 runs:
@@ -37,55 +37,20 @@ runs:
         name: renovate-regenerate
         path: ${{ runner.temp }}/renovate-regenerate
 
-    # The patch was built by a job that ran dependency code, so it is checked
-    # against the caller's paths here rather than trusted.
-    - name: Apply patch
+    # The patch comes from a job that ran dependency code. Only `paths` are
+    # staged, so anything else it changes stays out of the commit.
+    - name: Commit and push
       shell: bash
       env:
+        APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
         PATHS: ${{ inputs.paths }}
       run: |
         git apply "${RUNNER_TEMP}/renovate-regenerate/renovate-regenerate.patch"
-        mapfile -t paths < <(printf '%s\n' "${PATHS}" | sed '/^[[:space:]]*$/d')
-        if [ "${#paths[@]}" -eq 0 ]; then
-          echo "::error::paths is empty"
-          exit 1
-        fi
-        git add --all -- "${paths[@]}"
-        if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
-          echo "::error::The patch changes files outside paths"
-          git status --short
-          exit 1
-        fi
-
-    - name: Commit
-      shell: bash
-      env:
-        GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        HEAD_REF: ${{ github.event.pull_request.head.ref }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      run: |
-        changes="${RUNNER_TEMP}/renovate-regenerate"
-        git diff --cached --name-only --no-renames --diff-filter=d -z |
-          while IFS= read -r -d '' path; do
-            jq -nc --arg path "${path}" --rawfile contents <(base64 -w0 -- "${path}") '{$path, $contents}'
-          done > "${changes}/additions.json"
-        git diff --cached --name-only --no-renames --diff-filter=D -z |
-          while IFS= read -r -d '' path; do
-            jq -nc --arg path "${path}" '{$path}'
-          done > "${changes}/deletions.json"
-        jq -n \
-          --arg repo "${GITHUB_REPOSITORY}" \
-          --arg branch "${HEAD_REF}" \
-          --arg oid "${HEAD_SHA}" \
-          --slurpfile additions "${changes}/additions.json" \
-          --slurpfile deletions "${changes}/deletions.json" \
-          '{
-            query: "mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { url } } }",
-            variables: {input: {
-              branch: {repositoryNameWithOwner: $repo, branchName: $branch},
-              expectedHeadOid: $oid,
-              message: {headline: "chore(renovate): regenerate generated files"},
-              fileChanges: {additions: $additions, deletions: $deletions}
-            }}
-          }' > "${changes}/request.json"
-        gh api graphql --input "${changes}/request.json" --jq '.data.createCommitOnBranch.commit.url'
+        xargs git add -- <<< "${PATHS}"
+        user_id="$(gh api "users/${APP_SLUG}[bot]" --jq .id)"
+        git -c user.name="${APP_SLUG}[bot]" -c user.email="${user_id}+${APP_SLUG}[bot]@users.noreply.github.com" \
+          commit --message "chore(renovate): regenerate generated files"
+        gh auth setup-git
+        git push origin "HEAD:refs/heads/${HEAD_REF}"
