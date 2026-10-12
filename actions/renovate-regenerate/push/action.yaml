@@ -45,7 +45,12 @@ runs:
         PATHS: ${{ inputs.paths }}
       run: |
         git apply "${RUNNER_TEMP}/renovate-regenerate/renovate-regenerate.patch"
-        printf '%s\n' "${PATHS}" | sed '/^[[:space:]]*$/d' | git add --all --pathspec-from-file=-
+        mapfile -t paths < <(printf '%s\n' "${PATHS}" | sed '/^[[:space:]]*$/d')
+        if [ "${#paths[@]}" -eq 0 ]; then
+          echo "::error::paths is empty"
+          exit 1
+        fi
+        git add --all -- "${paths[@]}"
         if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
           echo "::error::The patch changes files outside paths"
           git status --short

@@ -44,7 +44,12 @@ runs:
         PATHS: ${{ inputs.paths }}
       run: |
         git reset --quiet
-        printf '%s\n' "${PATHS}" | sed '/^[[:space:]]*$/d' | git add --all --pathspec-from-file=-
+        mapfile -t paths < <(printf '%s\n' "${PATHS}" | sed '/^[[:space:]]*$/d')
+        if [ "${#paths[@]}" -eq 0 ]; then
+          echo "::error::paths is empty"
+          exit 1
+        fi
+        git add --all -- "${paths[@]}"
         if git diff --cached --quiet; then
           echo "changed=false" >> "${GITHUB_OUTPUT}"
         else
