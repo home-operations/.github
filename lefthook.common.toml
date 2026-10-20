@@ -36,23 +36,30 @@ stage_fixed = true
 name = "lock-mise"
 run = 'mise lock && git add -A -- .mise ":(exclude).mise/*.toml"'
 
+# The staged paths go to oxfmt by name, and oxfmt drops those a repository's
+# .prettierignore covers, generated chart docs and schemas among them; when
+# that is every path it was given it exits non-zero, which would fail a
+# commit of only ignored files. Told not to, it exits zero and formats
+# nothing. A repository cannot fix this on its own: remotes merge over the
+# repository's lefthook config, so its exclude or run for these commands
+# never applies.
 [pre-commit.commands.format-json]
 glob = ["*.json", "*.json5", "*.jsonc"]
 # mise lock sidecars are digest-pinned in mise.lock; reformatting them makes
 # `mise install --locked` fail with a digest mismatch.
 exclude = [".mise/locks/**"]
-run = "oxfmt {staged_files}"
+run = "oxfmt --no-error-on-unmatched-pattern {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.format-markdown]
 glob = ["*.md", "*.markdown", "*.mdx"]
-run = "oxfmt {staged_files}"
+run = "oxfmt --no-error-on-unmatched-pattern {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.format-yaml]
 glob = ["*.yaml", "*.yml"]
 exclude = [".mise/locks/**"]
-run = "oxfmt {staged_files}"
+run = "oxfmt --no-error-on-unmatched-pattern {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.actionlint]
