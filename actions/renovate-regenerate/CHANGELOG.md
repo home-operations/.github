@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/home-operations/.github/compare/renovate-regenerate-v1.0.0...renovate-regenerate-v1.0.1) (2026-10-24)
+
+
+### Miscellaneous Chores
+
+* **github-action:** update github-actions ([#145](https://github.com/home-operations/.github/issues/145)) ([8da5efa](https://github.com/home-operations/.github/commit/8da5efaa038b680ef34c517f2365561533a9ff43))
+
 ## 1.0.0 (2026-10-12)
 
 
