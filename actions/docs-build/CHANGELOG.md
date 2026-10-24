@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.3](https://github.com/home-operations/.github/compare/docs-build-v1.0.2...docs-build-v1.0.3) (2026-10-24)
+
+
+### Miscellaneous Chores
+
+* **github-action:** update action jdx/mise-action (v4.3.0 → v5.0.0) ([#125](https://github.com/home-operations/.github/issues/125)) ([f55e81d](https://github.com/home-operations/.github/commit/f55e81d8901db000e6da6e789fb8a88ab106404a))
+* **github-action:** update action jdx/mise-action (v5.0.0 → v5.0.1) ([#133](https://github.com/home-operations/.github/issues/133)) ([e563898](https://github.com/home-operations/.github/commit/e563898d1d2d94fac6d8dca2b2dc090d54cef162))
+* **github-action:** update github-actions ([#136](https://github.com/home-operations/.github/issues/136)) ([8c68688](https://github.com/home-operations/.github/commit/8c6868839f0b75ad5a6c8dc57209eb9c62ad74fc))
+* **github-action:** update github-actions ([#145](https://github.com/home-operations/.github/issues/145)) ([8da5efa](https://github.com/home-operations/.github/commit/8da5efaa038b680ef34c517f2365561533a9ff43))
+
 ## [1.0.2](https://github.com/home-operations/.github/compare/docs-build-v1.0.1...docs-build-v1.0.2) (2026-09-18)
 
 
