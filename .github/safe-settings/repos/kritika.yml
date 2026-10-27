@@ -59,3 +59,46 @@ rulesets:
           # join the same group.
           min_entries_to_merge: 1
           min_entries_to_merge_wait_minutes: 5
+
+  # One approval before merge. kritika reviews this repo, and its GitHub App
+  # (bot-vila) approves the pull requests its review clears; any it does not
+  # approve need a maintainer's approval instead.
+  #
+  # A ruleset of its own rather than a second pull_request rule in `main`: that
+  # one would be concatenated after the baseline's and dropped as a duplicate.
+  # Where rulesets overlap GitHub enforces each, so the stricter count holds.
+  - name: approval
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+          - "~DEFAULT_BRANCH"
+        exclude: []
+    # Same escape hatch as the baseline, in the order GitHub returns them.
+    bypass_actors:
+      - actor_type: OrganizationAdmin
+        bypass_mode: always
+      - actor_id: 5
+        actor_type: RepositoryRole
+        bypass_mode: always
+    rules:
+      - type: pull_request
+        parameters:
+          required_approving_review_count: 1
+          # kritika approves the exact head it reviewed. Without this an approval
+          # outlives a push, and auto-merge could land commits kritika has not
+          # reviewed yet.
+          dismiss_stale_reviews_on_push: true
+          require_code_owner_review: false
+          require_last_push_approval: false
+          required_review_thread_resolution: false
+          # Stated for the same reason as in the baseline: GitHub fills in
+          # omitted parameters, which safe-settings would see as drift.
+          required_reviewers: []
+          dismissal_restriction:
+            enabled: false
+            allowed_actors: []
+          require_extra_approval_for_unattributed_changes: true
+          allowed_merge_methods:
+            - squash
