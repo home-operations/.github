@@ -6,10 +6,9 @@ Org-wide defaults for [home-operations](https://github.com/home-operations). Eve
 
 Shared CI steps, each versioned and tagged on its own. Reference them by commit SHA — a branch or tag reference trips zizmor's `unpinned-uses` audit in the calling repository.
 
-| Action                                   | Purpose                                                              |
-| ---------------------------------------- | -------------------------------------------------------------------- |
-| [`workflow-lint`](actions/workflow-lint) | Lints workflows and action definitions with actionlint and zizmor    |
-| [`docs-build`](actions/docs-build)       | Builds the docs site with mise and uploads the GitHub Pages artifact |
+| Action                                   | Purpose                                                           |
+| ---------------------------------------- | ----------------------------------------------------------------- |
+| [`workflow-lint`](actions/workflow-lint) | Lints workflows and action definitions with actionlint and zizmor |
 
 Each has its own README, changelog and `<component>-<version>` tag, so one action's release never moves the other's version.
 
