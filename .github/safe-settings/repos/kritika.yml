@@ -60,9 +60,8 @@ rulesets:
           min_entries_to_merge: 1
           min_entries_to_merge_wait_minutes: 5
 
-  # One approval before merge. kritika reviews this repo, and its GitHub App
-  # (bot-vila) approves the pull requests its review clears; any it does not
-  # approve need a maintainer's approval instead.
+  # A sole maintainer cannot approve their own pull requests. Reviews are
+  # advisory; required CI and the merge queue gate merging.
   #
   # A ruleset of its own rather than a second pull_request rule in `main`: that
   # one would be concatenated after the baseline's and dropped as a duplicate.
@@ -85,10 +84,8 @@ rulesets:
     rules:
       - type: pull_request
         parameters:
-          required_approving_review_count: 1
-          # kritika approves the exact head it reviewed. Without this an approval
-          # outlives a push, and auto-merge could land commits kritika has not
-          # reviewed yet.
+          required_approving_review_count: 0
+          # Advisory approvals still describe only the head that was reviewed.
           dismiss_stale_reviews_on_push: true
           require_code_owner_review: false
           require_last_push_approval: false
