@@ -65,6 +65,15 @@ url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-linux-x64.tar.gz"
 checksum = "sha256:aa9549349e47dffaa42dcf95d6e06ade8c4bdafc980979883b88767670df385a"
 url = "https://nodejs.org/dist/v24.22.2/node-v24.22.2-darwin-arm64.tar.gz"
 
+[[tools."npm:renovate"]]
+version = "44.188.2"
+aube = { path = "locks/npm-renovate/44.188.2~dd67d2de", digest = "sha256:9555026ee353adffbf05bea461ce8213dcd92001cb968c48f59b6bb052a77b96" }
+backend = "npm:renovate"
+specifiers = ["44.188.2"]
+
+[tools."npm:renovate".options]
+trust_policy_excludes = '["@yarnpkg/libzip"]'
+
 [[tools.oxfmt]]
 version = "0.75.0"
 aube = { path = "locks/oxfmt/0.75.0", digest = "sha256:1d4f470a5dbba272218132db6ff9ba1911075d29dcd3253a0e02b4a5037a8a23" }

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "docker:enableMajor",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "abandonments:recommended",
+    "./renovate/annotated.json5",
+    "./renovate/autoMerge.json5",
+    "./renovate/groups.json5",
+    "./renovate/labels.json5",
+    "./renovate/semanticCommits.json5",
+    "./renovate/sharedActions.json5",
+    ":automergePr",
+    ":configMigration",
+    ":dependencyDashboard",
+    ":disableRateLimiting"
+  ],
+  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "prHourlyLimit": 1,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
+    "**/.mise/locks/**"
+  ],
+  "registryAliases": {
+    "mirror.gcr.io": "docker.io"
+  },
+  "gitIgnoredAuthors": ["203671426+sticky-gecko[bot]@users.noreply.github.com"],
+  "packageRules": [
+    {
+      "description": "NPM Bump Range Strategy",
+      "matchManagers": ["npm"],
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "Hold package-registry updates (Go modules, npm, PyPI, crates) until they are 3 days old, the same window as the github-actions and mise groups",
+      "matchCategories": ["golang", "js", "python", "rust"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "First-party Go modules (e.g. flate) skip the hold",
+      "matchPackageNames": ["github.com/home-operations/**"],
+      "minimumReleaseAge": "0 days"
+    }
+  ]
+}

@@ -17,6 +17,8 @@ Each has its own README, changelog and `<component>-<version>` tag, so one actio
 | Path                    | Purpose                                                                                                   |
 | ----------------------- | --------------------------------------------------------------------------------------------------------- |
 | `lefthook.common.toml`  | Pre-commit hooks every repository extends as a lefthook remote, pinned to `main`                          |
+| `renovate-config.json`  | Renovate preset every repository extends as `local>home-operations/.github:renovate-config`               |
+| `renovate`              | Parts of that preset, pulled in by relative path from `renovate-config.json`                              |
 | `.github/safe-settings` | Repository settings reconciled across the org by [safe-settings](https://github.com/github/safe-settings) |
 | `.github/workflows`     | Org-level automation: Renovate, safe-settings reconciliation, stale issue handling                        |
 

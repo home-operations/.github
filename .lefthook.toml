@@ -1,1 +1,5 @@
 extends = ["lefthook.common.toml"]
+
+[pre-commit.commands.renovate-config-validator]
+glob = ["renovate-config.json", "renovate/*.json5", ".renovaterc.json5"]
+run = "renovate-config-validator --strict {staged_files}"
