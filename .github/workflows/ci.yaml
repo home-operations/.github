@@ -38,7 +38,7 @@ jobs:
           install_args: --locked
 
       - name: Validate Renovate presets
-        run: mise run validate renovate-config.json renovate/*.json5 .renovaterc.json5
+        run: mise run validate renovate-config.json .renovaterc.json5
 
   workflow-lint:
     name: Workflow Lint
