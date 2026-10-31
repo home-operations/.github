@@ -58,109 +58,7 @@
   ],
   "packageRules": [
     {
-      "description": "Auto-merge non-major updates, but only after every CI check passes",
-      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
-      "automerge": true
-    },
-    {
-      "description": "zer0ver: 0.x minors can break at any time, don't automerge them. Devtools are the exception: a bad formatter or linter bump only breaks CI, which is what the gate is for",
-      "matchUpdateTypes": ["minor"],
-      "matchCurrentVersion": "/^v?0\\./",
-      "matchDepNames": [
-        "!aqua:dadav/helm-schema",
-        "!helm-unittest/helm-unittest",
-        "!oxfmt",
-        "!shellcheck"
-      ],
-      "automerge": false
-    },
-    {
-      "description": "Auto-merge trusted GitHub Actions",
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["/^actions\\//", "/^docker\\//"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
-      "automergeType": "pr",
-      "minimumReleaseAge": "1 minute",
-      "ignoreTests": false
-    },
-    {
-      "description": "GitHub Actions Group",
-      "matchManagers": ["github-actions"],
-      "groupName": "github-actions",
-      "minimumReleaseAge": "3 days"
-    },
-    {
-      "description": [
-        "Mise Tools Group",
-        "Catch-all for mise-managed dev tooling (linters, formatters, CLIs). Kept above the language-toolchain rules so their more specific groupName wins for go/rust/node (later packageRules override earlier ones).",
-        "Same minimumReleaseAge as the GitHub Actions group. Fresh releases often finish uploading per-arch assets and attestations after the tag appears; locking too early is how mise.lock ends up with missing platform URLs."
-      ],
-      "matchManagers": ["mise"],
-      "groupName": "mise tools",
-      "groupSlug": "mise-tools",
-      "minimumReleaseAge": "3 days"
-    },
-    {
-      "description": "Go Toolchain Group",
-      "matchManagers": ["mise"],
-      "matchDepNames": ["go"],
-      "matchFileNames": [".mise/config.toml"],
-      "groupName": "Go toolchain",
-      "groupSlug": "go-toolchain"
-    },
-    {
-      "description": "Rust Toolchain Group",
-      "matchManagers": ["mise"],
-      "matchDepNames": ["rust"],
-      "matchFileNames": [".mise/config.toml"],
-      "groupName": "Rust toolchain",
-      "groupSlug": "rust-toolchain"
-    },
-    {
-      "description": "Node Toolchain Group",
-      "matchManagers": ["mise"],
-      "matchDepNames": ["node"],
-      "matchFileNames": [".mise/config.toml"],
-      "groupName": "Node toolchain",
-      "groupSlug": "node-toolchain"
-    },
-    {
-      "description": [
-        "zer0ver: 0.x minors can break at any time, route them onto the major branches",
-        "The branch prefix lands these on the same major-<groupSlug> branch Renovate uses to split grouped majors, instead of the safe group PR."
-      ],
-      "matchUpdateTypes": ["minor"],
-      "matchCurrentVersion": "/^v?0\\./",
-      "additionalBranchPrefix": "major-"
-    },
-    {
-      "matchUpdateTypes": ["major"],
-      "labels": ["type/major"]
-    },
-    {
-      "matchUpdateTypes": ["minor"],
-      "labels": ["type/minor"]
-    },
-    {
-      "description": [
-        "zer0ver: 0.x minors can break at any time, label them as majors",
-        "Keep below the plain minor rule so this one wins for 0.x."
-      ],
-      "matchUpdateTypes": ["minor"],
-      "matchCurrentVersion": "/^v?0\\./",
-      "labels": ["type/major"]
-    },
-    {
-      "matchUpdateTypes": ["patch"],
-      "labels": ["type/patch"]
-    },
-    {
-      "matchUpdateTypes": ["digest"],
-      "labels": ["type/digest"]
-    },
-    {
-      "description": "Always chore, so dependency bumps never trigger release-please releases",
+      "description": "Always chore, so that a dependency bump never makes release-please cut a release.",
       "matchPackageNames": ["*"],
       "semanticCommitType": "chore"
     },
@@ -233,7 +131,40 @@
       "commitMessageTopic": "role {{depName}}"
     },
     {
-      "description": "Match the github-actions manager's group and semantic commit rules so these PRs look like every other action bump.",
+      "matchUpdateTypes": ["major"],
+      "labels": ["type/major"]
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "labels": ["type/minor"]
+    },
+    {
+      "description": [
+        "zer0ver: a 0.x minor can break at any time. Label it as a major and put it on the major branch.",
+        "The prefix lands it on the major-<groupSlug> branch that Renovate uses to split grouped majors, not on the non-major group PR.",
+        "Keep this rule below the plain minor rule, so that it wins for 0.x."
+      ],
+      "matchUpdateTypes": ["minor"],
+      "matchCurrentVersion": "/^v?0\\./",
+      "labels": ["type/major"],
+      "additionalBranchPrefix": "major-"
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "labels": ["type/patch"]
+    },
+    {
+      "matchUpdateTypes": ["digest"],
+      "labels": ["type/digest"]
+    },
+    {
+      "description": "GitHub Actions group",
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Give these PRs the group and the commit format of the github-actions manager, so that they look like every other action bump.",
       "matchManagers": ["custom.regex"],
       "matchPackageNames": ["home-operations/.github"],
       "groupName": "github-actions",
@@ -242,17 +173,77 @@
       "commitMessagePrefix": "{{semanticCommitType}}({{semanticCommitScope}}):"
     },
     {
-      "description": "NPM Bump Range Strategy",
-      "matchManagers": ["npm"],
-      "rangeStrategy": "bump"
+      "description": [
+        "Mise tools group: the catch-all for mise-managed dev tooling (linters, formatters, CLIs).",
+        "Keep it above the toolchain rules, so that their groupName wins for go, rust and node. A later rule overrides an earlier one.",
+        "Same minimumReleaseAge as the GitHub Actions group. A fresh release often uploads its per-arch assets and attestations after the tag appears. A lock taken too early leaves mise.lock without platform URLs."
+      ],
+      "matchManagers": ["mise"],
+      "groupName": "mise tools",
+      "groupSlug": "mise-tools",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Go toolchain group",
+      "matchManagers": ["mise"],
+      "matchDepNames": ["go"],
+      "matchFileNames": [".mise/config.toml"],
+      "groupName": "Go toolchain",
+      "groupSlug": "go-toolchain"
+    },
+    {
+      "description": "Rust toolchain group",
+      "matchManagers": ["mise"],
+      "matchDepNames": ["rust"],
+      "matchFileNames": [".mise/config.toml"],
+      "groupName": "Rust toolchain",
+      "groupSlug": "rust-toolchain"
+    },
+    {
+      "description": "Node toolchain group",
+      "matchManagers": ["mise"],
+      "matchDepNames": ["node"],
+      "matchFileNames": [".mise/config.toml"],
+      "groupName": "Node toolchain",
+      "groupSlug": "node-toolchain"
     },
     {
       "description": [
-        "NPM Release Age",
-        "pnpm 12 refuses a frozen install of a lockfile entry published less than 24 hours ago (ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION). A PR opened sooner fails every install job until the release is a day old, so wait that day before opening it."
+        "npm: bump ranges and wait a day.",
+        "pnpm 12 refuses a frozen install of a lockfile entry that is less than 24 hours old (ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION). A PR opened sooner fails every install job for that day."
       ],
       "matchManagers": ["npm"],
+      "rangeStrategy": "bump",
       "minimumReleaseAge": "1 day"
+    },
+    {
+      "description": "Auto-merge non-major updates once the required checks pass.",
+      "matchUpdateTypes": ["minor", "patch", "digest", "lockFileMaintenance"],
+      "automerge": true
+    },
+    {
+      "description": "zer0ver: a 0.x minor can break at any time, so do not auto-merge it. Devtools are the exception: a bad formatter or linter bump only breaks CI, and that is what the gate is for.",
+      "matchUpdateTypes": ["minor"],
+      "matchCurrentVersion": "/^v?0\\./",
+      "matchDepNames": [
+        "!aqua:dadav/helm-schema",
+        "!helm-unittest/helm-unittest",
+        "!oxfmt",
+        "!shellcheck"
+      ],
+      "automerge": false
+    },
+    {
+      "description": [
+        "Auto-merge trusted GitHub Actions.",
+        "No minimumReleaseAge here. The GitHub Actions group rule above matches the same actions and supplies the three-day release age."
+      ],
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["/^actions\\//", "/^docker\\//"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "ignoreTests": false
     }
   ]
 }
