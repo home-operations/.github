@@ -245,6 +245,14 @@
       "description": "NPM Bump Range Strategy",
       "matchManagers": ["npm"],
       "rangeStrategy": "bump"
+    },
+    {
+      "description": [
+        "NPM Release Age",
+        "pnpm 12 refuses a frozen install of a lockfile entry published less than 24 hours ago (ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION). A PR opened sooner fails every install job until the release is a day old, so wait that day before opening it."
+      ],
+      "matchManagers": ["npm"],
+      "minimumReleaseAge": "1 day"
     }
   ]
 }
