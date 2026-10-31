@@ -18,7 +18,6 @@
   ],
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "minimumReleaseAgeBehaviour": "timestamp-optional",
-  "prHourlyLimit": 1,
   "ignorePaths": [
     "**/node_modules/**",
     "**/bower_components/**",
