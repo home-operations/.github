@@ -1,4 +1,4 @@
 {
-  "actions/renovate-regenerate": "1.0.0",
+  "actions/renovate-regenerate": "1.0.1",
   "actions/workflow-lint": "1.0.4"
 }
