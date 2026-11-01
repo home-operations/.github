@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-action.json
 name: Workflow Lint
-description: Lint workflows and action definitions with actionlint and zizmor
+description: Lint workflows and action definitions with actionlint and zizmor, and check formatting with oxfmt
 
 inputs:
   actionlint-version:
@@ -39,3 +39,18 @@ runs:
         ZIZMOR_VERSION: ${{ inputs.zizmor-version }}
       run: |
         mise exec zizmor@"${ZIZMOR_VERSION}" -- zizmor --color=always --no-progress .
+
+    - name: Check formatting
+      if: ${{ !cancelled() && hashFiles('.lefthook.toml') != '' }}
+      shell: bash
+      run: |
+        lefthook_version="$(mise config get tools.lefthook)"
+        oxfmt_version="$(mise config get tools.oxfmt)"
+        tools=("lefthook@${lefthook_version}" "oxfmt@${oxfmt_version}")
+        # oxfmt installs through npm, and mise refuses to install it until a
+        # pinned node is present. Without a pin it uses the runner's node.
+        if node_version="$(mise config get tools.node 2>/dev/null)"; then
+          tools=("node@${node_version}" "${tools[@]}")
+        fi
+        mise exec "${tools[@]}" -- \
+          lefthook run pre-commit --all-files --fail-on-changes --tag ci

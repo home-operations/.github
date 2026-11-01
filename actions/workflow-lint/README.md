@@ -1,6 +1,6 @@
 # workflow-lint
 
-Lints workflows and action definitions with [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor).
+Lints workflows and action definitions with [actionlint](https://github.com/rhysd/actionlint) and [zizmor](https://github.com/zizmorcore/zizmor). Checks JSON, YAML and Markdown formatting with oxfmt.
 
 ## Usage
 
@@ -39,4 +39,6 @@ Reference it by commit SHA. A branch or tag reference trips zizmor's `unpinned-u
 - Two more suppress actionlint's errors for the `$/` self-repository `uses:` syntax until [rhysd/actionlint#711](https://github.com/rhysd/actionlint/issues/711) ships in a release. zizmor already supports it as of 1.29.0.
 - One more suppresses actionlint's unknown runner label error for `ubuntu-26.04` and `ubuntu-26.04-arm` until [rhysd/actionlint#682](https://github.com/rhysd/actionlint/issues/682) ships in a release.
 - zizmor runs online with `${{ github.token }}`, so the API-backed audits such as impostor commits and known-vulnerable actions are active. The lefthook pre-commit hook runs `--offline` and does not cover those.
-- zizmor runs even when actionlint fails, so a single run reports both.
+- If a repository has a `.lefthook.toml`, lefthook runs the hooks tagged `ci` in `lefthook.common.toml` over every tracked file. If a hook changes a file, the step fails.
+- The step reads the lefthook and oxfmt versions from the repository's `.mise/config.toml`. You must pin both tools there.
+- If an earlier step fails, zizmor and the formatting check still run. A single run reports all three.

@@ -43,22 +43,28 @@ run = 'mise lock && git add -A -- .mise ":(exclude).mise/*.toml"'
 # nothing. A repository cannot fix this on its own: remotes merge over the
 # repository's lefthook config, so its exclude or run for these commands
 # never applies.
+#
+# The workflow-lint action runs the hooks tagged ci with only lefthook and oxfmt
+# installed, so a tagged hook can call no other tool.
 [pre-commit.commands.format-json]
 glob = ["*.json", "*.json5", "*.jsonc"]
 # mise lock sidecars are digest-pinned in mise.lock; reformatting them makes
 # `mise install --locked` fail with a digest mismatch.
 exclude = [".mise/locks/**"]
+tags = ["ci"]
 run = "oxfmt --no-error-on-unmatched-pattern {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.format-markdown]
 glob = ["*.md", "*.markdown", "*.mdx"]
+tags = ["ci"]
 run = "oxfmt --no-error-on-unmatched-pattern {staged_files}"
 stage_fixed = true
 
 [pre-commit.commands.format-yaml]
 glob = ["*.yaml", "*.yml"]
 exclude = [".mise/locks/**"]
+tags = ["ci"]
 run = "oxfmt --no-error-on-unmatched-pattern {staged_files}"
 stage_fixed = true
 
