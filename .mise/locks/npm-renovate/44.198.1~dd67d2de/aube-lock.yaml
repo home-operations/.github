@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       renovate:
-        specifier: 44.198.0
-        version: 44.198.0(supports-color@7.2.0)(typanion@3.14.0)
+        specifier: 44.198.1
+        version: 44.198.1(supports-color@7.2.0)(typanion@3.14.0)
 
 packages:
 
@@ -1264,8 +1264,8 @@ packages:
     resolution: {integrity: sha512-V+23sDMr12Wnz7iTcDeJr3O6AIxlnvT/bmaAAAP/Xda35C90p9599p0F1eHR/N1KILWSoWVAiOMFjBBXaXSMxg==}
     engines: {node: '>=10.19.0'}
 
-  http2-wrapper@2.2.1:
-    resolution: {integrity: sha512-V5nVw1PAOgfI3Lmeaj2Exmeg7fenjhRUgz1lPSezy1CuhPYbgQtbQj4jZfEAEMlaL+vupsvhjqCyjzob0yxsmQ==}
+  http2-wrapper@2.2.4:
+    resolution: {integrity: sha512-y5jx4isTOKEC5Hu1lswc+IxytGlqDmwF1qJtk9qIS8l1KVxuHO5g522UfmErt1H2pMcH/xq+KiFQUB8aVWIABA==}
     engines: {node: '>=10.19.0'}
 
   https-proxy-agent@7.0.6:
@@ -1932,8 +1932,8 @@ packages:
   remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
 
-  renovate@44.198.0:
-    resolution: {integrity: sha512-TPKFkA2a8P2eChGYhnV5IeZemQS/Qpl/aEJgcHBuVf1YHLGBWnQSGQu7eLmUqUbii1vmEtVGS62TFgoQVJ9h0Q==}
+  renovate@44.198.1:
+    resolution: {integrity: sha512-HCCTWG+LIrbqLpCsIZ4ws8lIToE79B0HpidreqflvMrEjHSPPpv9MyH2n7L1b/e0/nF0zNiQwxuIN6m1xUCwvg==}
     engines: {node: ^24.11.0, pnpm: ^11.0.0}
     hasBin: true
 
@@ -3813,7 +3813,7 @@ snapshots:
       cacheable-request: 13.0.19
       chunk-data: 0.1.0
       decompress-response: 10.0.0
-      http2-wrapper: 2.2.1
+      http2-wrapper: 2.2.4
       keyv: 5.6.0
       lowercase-keys: 4.0.1
       responselike: 4.0.2
@@ -3869,7 +3869,7 @@ snapshots:
       quick-lru: 5.1.1
       resolve-alpn: 1.2.1
 
-  http2-wrapper@2.2.1:
+  http2-wrapper@2.2.4:
     dependencies:
       quick-lru: 5.1.1
       resolve-alpn: 1.2.1
@@ -4689,7 +4689,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  renovate@44.198.0(supports-color@7.2.0)(typanion@3.14.0):
+  renovate@44.198.1(supports-color@7.2.0)(typanion@3.14.0):
     dependencies:
       '@aws-sdk/client-codecommit': 3.1139.0
       '@aws-sdk/client-ec2': 3.1139.0
