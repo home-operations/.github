@@ -12,14 +12,6 @@
       "include-component-in-tag": true,
       "include-v-in-tag": true,
       "include-v-in-release-name": true
-    },
-    "actions/workflow-lint": {
-      "component": "workflow-lint",
-      "changelog-path": "CHANGELOG.md",
-      "release-type": "simple",
-      "include-component-in-tag": true,
-      "include-v-in-tag": true,
-      "include-v-in-release-name": true
     }
   },
   "changelog-sections": [
