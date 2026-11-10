@@ -34,7 +34,7 @@ stage_fixed = true
 
 [[pre-commit.jobs.group.jobs]]
 name = "lock-mise"
-run = 'mise lock && git add -A -- .mise ":(exclude).mise/*.toml"'
+run = "mise lock && git add -A -- .mise ':(exclude).mise/*.toml'"
 
 # The staged paths go to oxfmt by name, and oxfmt drops those a repository's
 # .prettierignore covers, generated chart docs and schemas among them; when
