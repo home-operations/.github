@@ -10,7 +10,9 @@
     ":dependencyDashboard",
     ":disableRateLimiting"
   ],
-  "dependencyDashboardTitle": "Renovate Dashboard 🤖",
+  "dependencyDashboard": {
+    "title": "Renovate Dashboard 🤖"
+  },
   "minimumReleaseAgeBehaviour": "timestamp-optional",
   "ignorePaths": [
     "**/node_modules/**",
