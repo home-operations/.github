@@ -65,7 +65,12 @@
       "semanticCommitType": "chore"
     },
     {
-      "matchUpdateTypes": ["major", "minor", "patch"],
+      "description": "Closing a PR only ignores updates whose title matches it, so a major title must not change with each release.",
+      "matchUpdateTypes": ["major"],
+      "commitMessageExtra": "to {{prettyNewMajor}}"
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
       "commitMessageExtra": "({{currentVersion}} → {{newVersion}})"
     },
     {
