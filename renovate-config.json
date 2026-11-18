@@ -234,6 +234,7 @@
       "matchCurrentVersion": "/^v?0\\./",
       "matchDepNames": [
         "!aqua:dadav/helm-schema",
+        "!github:oxc-project/oxc",
         "!helm-unittest/helm-unittest",
         "!oxfmt",
         "!shellcheck"
