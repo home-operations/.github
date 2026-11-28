@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.1](https://github.com/home-operations/.github/compare/renovate-regenerate-v1.0.0...renovate-regenerate-v1.0.1) (2026-11-28)
+
+
+### Miscellaneous Chores
+
+* **github-action:** update action jdx/mise-action (v5.2.10 → v5.3.0) ([#235](https://github.com/home-operations/.github/issues/235)) ([baf52a8](https://github.com/home-operations/.github/commit/baf52a8e5bbe9b51001ab613ec73ac753f040fd8))
+* **github-action:** update action jdx/mise-action (v5.2.2 → v5.2.3) ([#150](https://github.com/home-operations/.github/issues/150)) ([7f7b76b](https://github.com/home-operations/.github/commit/7f7b76b8dfabe5f8ddf07994781a765f71a098bd))
+* **github-action:** update action jdx/mise-action (v5.2.3 → v5.2.4) ([#155](https://github.com/home-operations/.github/issues/155)) ([a136fea](https://github.com/home-operations/.github/commit/a136fea648e70f1c35e867eee0d3b74765d7b2db))
+* **github-action:** update action jdx/mise-action (v5.2.4 → v5.2.5) ([#169](https://github.com/home-operations/.github/issues/169)) ([679f06d](https://github.com/home-operations/.github/commit/679f06d511d88a1abe393df26a18811cb23042f7))
+* **github-action:** update action jdx/mise-action (v5.2.6 → v5.2.7) ([#188](https://github.com/home-operations/.github/issues/188)) ([f5e6d7a](https://github.com/home-operations/.github/commit/f5e6d7a8d09b10d7b56685e541e665d8211c8047))
+* **github-action:** update action jdx/mise-action (v5.2.7 → v5.2.8) ([#208](https://github.com/home-operations/.github/issues/208)) ([1f44487](https://github.com/home-operations/.github/commit/1f44487e6d500ca4c74d4365e5960fb8e3681cb2))
+* **github-action:** update action jdx/mise-action (v5.2.8 → v5.2.9) ([#215](https://github.com/home-operations/.github/issues/215)) ([43e5512](https://github.com/home-operations/.github/commit/43e55120e02afefc9d12d40a183ed78069a70d71))
+* **github-action:** update github-actions ([#145](https://github.com/home-operations/.github/issues/145)) ([8da5efa](https://github.com/home-operations/.github/commit/8da5efaa038b680ef34c517f2365561533a9ff43))
+* **github-action:** update github-actions ([#173](https://github.com/home-operations/.github/issues/173)) ([d9077cb](https://github.com/home-operations/.github/commit/d9077cb4b03b68eccf69c68086446d96c9c6e59c))
+* **github-action:** update github-actions ([#223](https://github.com/home-operations/.github/issues/223)) ([877b06e](https://github.com/home-operations/.github/commit/877b06eb5f030bc5c1c9bd504f9717604f8b2354))
+
 ## 1.0.0 (2026-10-12)
 
 
